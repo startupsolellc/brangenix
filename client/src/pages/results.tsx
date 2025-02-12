@@ -43,7 +43,7 @@ export default function Results() {
       <div className="min-h-screen gradient-bg flex items-center justify-center">
         <div className="loading-container">
           <p className="loading-text">
-            İsimler üretiliyor, lütfen bekleyiniz
+            {translations[language].loading}
           </p>
           <LoadingSpinner />
         </div>

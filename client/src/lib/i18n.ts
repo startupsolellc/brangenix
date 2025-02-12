@@ -14,7 +14,7 @@ export const translations = {
     generate: "Generate Names",
     createNew: "↩ Create New Names",
     generateNew: "🔄 Generate New",
-    loading: "Generating names...",
+    loading: "Generating names, please wait",
     errors: {
       keywords: "Please enter between 3-5 keywords",
       category: "Please select a category",
@@ -36,7 +36,7 @@ export const translations = {
     generate: "İsim Üret",
     createNew: "↩ Yeni İsim Oluştur",
     generateNew: "🔄 Yeniden Üret",
-    loading: "İsimler üretiliyor...",
+    loading: "İsimler üretiliyor, lütfen bekleyiniz",
     errors: {
       keywords: "Lütfen 3-5 anahtar kelime girin",
       category: "Lütfen bir kategori seçin",
