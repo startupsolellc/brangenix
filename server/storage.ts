@@ -1,29 +1,23 @@
-import { type InsertBrandName, type BrandName } from "@shared/schema";
+import { brandNames, type BrandName, type InsertBrandName } from "@shared/schema";
+import { db } from "./db";
 
 export interface IStorage {
   createBrandName(brandName: InsertBrandName): Promise<BrandName>;
   getBrandNames(): Promise<BrandName[]>;
 }
 
-export class MemStorage implements IStorage {
-  private brandNames: Map<number, BrandName>;
-  private currentId: number;
-
-  constructor() {
-    this.brandNames = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async createBrandName(insertBrandName: InsertBrandName): Promise<BrandName> {
-    const id = this.currentId++;
-    const brandName: BrandName = { id, ...insertBrandName };
-    this.brandNames.set(id, brandName);
+    const [brandName] = await db
+      .insert(brandNames)
+      .values(insertBrandName)
+      .returning();
     return brandName;
   }
 
   async getBrandNames(): Promise<BrandName[]> {
-    return Array.from(this.brandNames.values());
+    return await db.select().from(brandNames);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
