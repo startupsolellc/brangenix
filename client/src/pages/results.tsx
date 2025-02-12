@@ -11,8 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 export default function Results() {
   const [, setLocation] = useLocation();
   const [cooldown, setCooldown] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
-  
+
   const searchParams = new URLSearchParams(window.location.search);
   const keywords = searchParams.get("keywords")?.split(",") || [];
   const category = searchParams.get("category") || "";
@@ -25,16 +26,19 @@ export default function Results() {
 
   const handleGenerateNew = async () => {
     if (cooldown) return;
-    
+
     setCooldown(true);
+    setIsGenerating(true);
+
     await refetch();
-    
+
     setTimeout(() => {
       setCooldown(false);
+      setIsGenerating(false);
     }, 8000);
   };
 
-  if (isLoading) {
+  if (isLoading || isGenerating) {
     return (
       <div className="min-h-screen bg-[#EFF3F9] flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -57,7 +61,7 @@ export default function Results() {
           >
             {translations[language].createNew}
           </Button>
-          
+
           <Button
             onClick={handleGenerateNew}
             disabled={cooldown}
