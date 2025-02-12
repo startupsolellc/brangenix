@@ -1,0 +1,99 @@
+Project Name: Brand Name Generator
+Purpose: A web application that generates unique brand names using OpenAI based on user-input keywords and categories.
+
+Technical Requirements
+1. Frontend (User Interface)
+Fonts:
+
+Headings: Jost font (via Google Fonts).
+
+Other text: Montserrat font (via Google Fonts).
+
+Result cards: Randomly selected fonts from the Google Fonts API.
+
+Animations:
+
+Loading animation: A rotating gear icon in the center (CSS/SVG/Lottie).
+
+8-second cooldown period after clicking the "Generate New" button (animation remains active).
+
+Components:
+
+Home Page:
+
+Keyword input field (3-5 keywords required).
+
+Responsive design (light theme) with background color: #EFF3F9.
+
+Category selection field (e.g., Software, Trade, Fashion).
+
+Tag system: Each keyword is displayed as a deletable "tag" with an "X" button.
+
+"Generate" button (redirects users to the results page).
+
+Results Page:
+
+4 white-background cards (responsive design).
+
+Each card includes:
+
+AI-generated name (with a random Google Fonts font).
+
+Color picker to change the text color.
+
+Buttons:
+
+↩ Create New Names: Returns to the home page and resets the form.
+
+🔄 Generate New: Generates 4 new names after an 8-second cooldown (same criteria).
+
+Language Support:
+
+Language switcher (Turkish/English) to change the language of all texts.
+
+2. OpenAI Integration
+Prompt Optimization: Queries optimized as "Generate 4 unique, brandable, and category-appropriate names for a [category] company using keywords: [keywords]. Names must be professional and catchy."
+
+Filtering: Cache or uniqueness checks to prevent duplicate names.
+
+API Security: Rate limiting (1 request per user every 8 seconds).
+
+Endpoints:
+
+POST /generate-names: Returns a list of names from OpenAI based on user-provided keywords and category.
+
+GET /fonts: Returns a list of random Google Fonts (for result cards).
+
+User Flow
+Home Page:
+
+User adds 3-5 keywords (displayed as tags).
+
+Selects a category (e.g., "Software").
+
+Clicks "Generate."
+
+Results Page:
+
+Loading animation appears (during OpenAI request).
+
+4 unique names are displayed on cards.
+
+User can:
+
+Change text color using a color picker.
+
+Click "Generate New" to request more names (8-second cooldown).
+
+Click "↩ Create New Names" to return to the home page.
+
+Error Handling:
+
+Warn users if keyword count is <3 or >5.
+
+Display error messages for OpenAI failures.
+
+Additional Notes
+OpenAI Optimization: Ensure prompts include clear category and keyword inputs.
+
+Performance: Implement caching for faster font loading on the results page
