@@ -40,20 +40,24 @@ export default function Results() {
 
   if (isLoading || isGenerating) {
     return (
-      <div className="min-h-screen bg-[#EFF3F9] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <LoadingSpinner />
-          <p className="font-montserrat">
-            {translations[language].loading}
+      <div className="min-h-screen gradient-bg flex items-center justify-center">
+        <div className="loading-container">
+          <p className="loading-text">
+            İsimler üretiliyor, lütfen bekleyiniz
           </p>
+          <LoadingSpinner />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#EFF3F9] p-4 md:p-8">
+    <div className="min-h-screen gradient-bg p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
+        <h1 className="text-4xl font-jost font-bold text-center mb-8">
+          {translations[language].title}
+        </h1>
+
         <div className="flex justify-between items-center">
           <Button
             variant="outline"

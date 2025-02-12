@@ -49,7 +49,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#EFF3F9] flex items-center justify-center p-4">
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-jost font-bold mb-2">

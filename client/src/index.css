@@ -25,3 +25,15 @@
 .font-montserrat {
   font-family: 'Montserrat', sans-serif;
 }
+
+.gradient-bg {
+  background: linear-gradient(180deg, #EAEFF8 0%, #F7F9FC 100%);
+}
+
+.loading-container {
+  @apply flex flex-col items-center justify-center gap-6;
+}
+
+.loading-text {
+  @apply text-lg font-medium text-gray-700;
+}
