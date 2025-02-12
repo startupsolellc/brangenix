@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -44,25 +44,24 @@ export function BrandCard({ name }: BrandCardProps) {
     <Card className="w-full transform transition-all duration-200 hover:shadow-lg">
       <CardContent className="p-6 relative">
         <div className="absolute top-4 right-4">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 p-0"
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                >
-                  <Palette className="h-5 w-5" style={{ color }} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Change Color</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 p-0"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+              >
+                <Palette className="h-5 w-5" style={{ color }} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Change Color</p>
+            </TooltipContent>
+          </Tooltip>
+
           {showColorPicker && (
-            <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2">
+            <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 z-50">
               <input
                 type="color"
                 value={color}
