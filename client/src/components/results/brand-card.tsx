@@ -1,6 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
+// Önceden seçilmiş Google Fontlar
+const FONTS = [
+  'Roboto',
+  'Open Sans',
+  'Montserrat',
+  'Playfair Display',
+  'Raleway',
+  'Oswald',
+  'Pacifico',
+  'Ubuntu',
+  'Quicksand',
+  'Poppins'
+];
 
 interface BrandCardProps {
   name: string;
@@ -11,20 +25,18 @@ export function BrandCard({ name }: BrandCardProps) {
   const [font, setFont] = useState("");
 
   useEffect(() => {
-    // Load random Google Font
-    fetch("https://www.googleapis.com/webfonts/v1/webfonts?key=YOUR_API_KEY")
-      .then((res) => res.json())
-      .then((data) => {
-        const randomFont = data.items[Math.floor(Math.random() * data.items.length)];
-        const fontFamily = randomFont.family;
-        const fontUrl = randomFont.files.regular;
-        
-        const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
-        fontFace.load().then(() => {
-          document.fonts.add(fontFace);
-          setFont(fontFamily);
-        });
-      });
+    // Fontları yükle
+    const randomFont = FONTS[Math.floor(Math.random() * FONTS.length)];
+    const link = document.createElement('link');
+    link.href = `https://fonts.googleapis.com/css2?family=${randomFont.replace(' ', '+')}&display=swap`;
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    setFont(randomFont);
+
+    // Cleanup
+    return () => {
+      document.head.removeChild(link);
+    };
   }, []);
 
   return (
