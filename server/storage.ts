@@ -22,7 +22,6 @@ export interface IStorage {
     totalGenerations: number;
     activeUsers: number;
   }>;
-  getRecentActivity(limit?: number): Promise<UserActivity[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -155,6 +154,8 @@ export class DatabaseStorage implements IStorage {
 
   async decrementGenerationCredits(userId: number): Promise<void> {
     try {
+      console.log(`Attempting to decrement credits for user ${userId}`);
+
       // First get current credits
       const [currentUser] = await db
         .select({
@@ -163,8 +164,10 @@ export class DatabaseStorage implements IStorage {
         .from(users)
         .where(eq(users.id, userId));
 
+      console.log(`Current credits for user ${userId}: ${currentUser?.credits}`);
 
       if (!currentUser || currentUser.credits <= 0) {
+        console.log(`No credits available for user ${userId}`);
         throw new Error("No credits available");
       }
 
@@ -181,9 +184,14 @@ export class DatabaseStorage implements IStorage {
         )
         .returning({ updatedCredits: users.generationCredits });
 
+      console.log(`Update result for user ${userId}:`, result);
+
       if (!result.length) {
+        console.log(`Failed to decrement credits for user ${userId}`);
         throw new Error("Failed to decrement credits");
       }
+
+      console.log(`Successfully decremented credits for user ${userId}. New value: ${result[0].updatedCredits}`);
     } catch (error) {
       console.error("Error decrementing generation credits:", error);
       throw error instanceof Error ? error : new Error("Failed to decrement generation credits");
@@ -295,20 +303,6 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting user statistics:", error);
       throw new Error("Failed to get user statistics");
-    }
-  }
-  async getRecentActivity(limit: number = 50): Promise<UserActivity[]> {
-    try {
-      const activities = await db
-        .select()
-        .from(userActivity)
-        .orderBy(desc(userActivity.createdAt))
-        .limit(limit);
-
-      return activities;
-    } catch (error) {
-      console.error("Error getting recent activity:", error);
-      throw new Error("Failed to get recent activity");
     }
   }
 }
