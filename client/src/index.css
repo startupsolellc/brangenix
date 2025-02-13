@@ -39,6 +39,7 @@
 }
 
 .title {
-  @apply text-3xl md:text-4xl lg:text-5xl font-light text-[#333333] mb-4;
+  @apply text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-800;
   letter-spacing: 0.02em;
+  text-shadow: none; /* Gölgelendirmeyi kaldır */
 }
