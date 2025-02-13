@@ -3,9 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Search, X } from "lucide-react";
 import { translations } from "@/lib/i18n";
-import { categories, searchCategories } from "@/lib/categories";
+import { categories, searchCategories, getCategoryById } from "@/lib/categories";
 
 interface CategorySelectProps {
   value: string;
@@ -25,8 +26,60 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
     }
   }, [searchQuery, language]);
 
+  // Get selected category and subcategory
+  const getSelectedInfo = () => {
+    if (!value) return null;
+
+    const [categoryId, subCategoryId] = value.split('.');
+    const category = categories.find(c => c.id === categoryId);
+    if (!category) return null;
+
+    const subcategory = subCategoryId 
+      ? category.subcategories.find(s => s.id === subCategoryId)
+      : null;
+
+    return {
+      category,
+      subcategory
+    };
+  };
+
+  const selectedInfo = getSelectedInfo();
+
   return (
     <div className="space-y-4">
+      {/* Selected Categories Display */}
+      {selectedInfo && (
+        <div className="flex flex-wrap gap-2">
+          <Badge 
+            variant="secondary"
+            className="flex items-center gap-1"
+          >
+            {language === "tr" ? selectedInfo.category.nameInTurkish : selectedInfo.category.name}
+            <button
+              onClick={() => onChange("")}
+              className="ml-1 hover:bg-background/80 rounded-full p-0.5"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+          {selectedInfo.subcategory && (
+            <Badge 
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              {language === "tr" ? selectedInfo.subcategory.nameInTurkish : selectedInfo.subcategory.name}
+              <button
+                onClick={() => onChange(selectedInfo.category.id)}
+                className="ml-1 hover:bg-background/80 rounded-full p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+        </div>
+      )}
+
       <div className="relative">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
@@ -45,7 +98,7 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
               className={`
                 cursor-pointer transition-all duration-200 
                 hover:bg-gray-50/80 
-                ${value === category.id ? "border-primary ring-2 ring-primary/20 bg-primary/5" : ""}
+                ${value.startsWith(category.id) ? "border-primary ring-2 ring-primary/20 bg-primary/5" : ""}
                 min-h-[100px] flex flex-col
               `}
               onClick={() => onChange(category.id)}
@@ -54,7 +107,7 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
                 <h3 className="text-sm font-medium">
                   {language === "tr" ? category.nameInTurkish : category.name}
                 </h3>
-                {value === category.id && category.subcategories.length > 0 && (
+                {value.startsWith(category.id) && category.subcategories.length > 0 && (
                   <div className="mt-3 space-y-1.5 border-t pt-3">
                     {category.subcategories.map((sub) => (
                       <Button
@@ -63,7 +116,7 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
                         size="sm"
                         className={`
                           w-full justify-start text-xs hover:bg-primary/10
-                          ${value === `${category.id}.${sub.id}` ? 'bg-primary/5 text-primary' : ''}
+                          ${value === `${category.id}.${sub.id}` ? 'bg-primary/5 text-primary font-medium' : ''}
                         `}
                         onClick={(e) => {
                           e.stopPropagation();
