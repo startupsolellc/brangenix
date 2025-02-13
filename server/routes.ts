@@ -17,11 +17,11 @@ const openai = new OpenAI({
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate exactly 8 unique brand names using these keywords: ${keywords.join(", ")}.
-       Make them short and memorable.
+    ? `Generate exactly 8 unique and creative brand names using these keywords: ${keywords.join(", ")}.
+       Make them short, memorable, and ensure each name is completely different in style.
        Return response in this format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
-    : `Bu anahtar kelimeleri kullanarak tam 8 benzersiz marka ismi üret: ${keywords.join(", ")}.
-       İsimler kısa ve akılda kalıcı olmalı.
+    : `Bu anahtar kelimeleri kullanarak tam 8 benzersiz ve yaratıcı marka ismi üret: ${keywords.join(", ")}.
+       İsimler kısa, akılda kalıcı ve her biri farklı stilde olmalı.
        Yanıtı bu formatta döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
   return basePrompt;
@@ -52,14 +52,15 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator. Always respond with valid JSON containing exactly 8 names in an array."
+            content: "You are a brand name generator. Always respond with valid JSON containing exactly 8 names in an array. Each name must be unique and creative, never repeat patterns or styles."
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.7,
+        temperature: 1.2,           // Increased for more randomness
         max_tokens: 256,
-        presence_penalty: 0.5,
-        frequency_penalty: 0.5
+        presence_penalty: 1.0,      // Increased to discourage repetition
+        frequency_penalty: 1.0,     // Increased to discourage repetition
+        response_format: { type: "json_object" }  // Enforce JSON response
       });
 
       console.log("OpenAI API response received");
@@ -102,7 +103,7 @@ export function registerRoutes(app: Express) {
       console.error("Error generating names:", error);
       res.status(500).json({ 
         message: "Error generating names",
-        error: error.message 
+        error: error instanceof Error ? error.message : "Unknown error occurred"
       });
     }
   });

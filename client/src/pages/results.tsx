@@ -21,7 +21,7 @@ export default function Results() {
   const language = (searchParams.get("language") || "en") as Language;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["/api/generate-names", keywords.join(","), category, language],
+    queryKey: ["/api/generate-names", keywords.join(","), category, language, Date.now()], // Add timestamp
     queryFn: () => generateNames({ keywords, category, language }),
     retry: 2,
     gcTime: 0,
