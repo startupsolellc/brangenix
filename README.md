@@ -1,89 +1,3 @@
-# Bilingual Brand Name Generator
-
-A bilingual brand name generator web application that empowers entrepreneurs and businesses with AI-driven naming solutions and a flexible user credit system.
-
-## 1️⃣ Project Overview
-
-### Purpose
-This application helps users generate unique, creative brand names using AI technology, with support for both English and Turkish languages. It features a credit-based system for registered users and limited free generations for guests.
-
-### Tech Stack
-- **Frontend**: React with TypeScript, Tailwind CSS, shadcn/ui components
-- **Backend**: Express.js with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Passport.js with session-based auth
-- **API Integration**: OpenAI GPT-3.5 for name generation
-- **State Management**: TanStack Query (React Query)
-- **Routing**: Wouter
-- **Form Handling**: React Hook Form with Zod validation
-
-## 2️⃣ Backend Setup
-
-### API Routes
-
-#### Authentication Routes
-- `POST /api/register` - Register new user
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout
-- `GET /api/user` - Get current user info
-
-#### Generation Routes
-- `POST /api/generate-names` - Generate brand names
-- `GET /api/brand-names` - Get recent brand names
-
-#### Admin Routes
-- `GET /api/admin/statistics` - Get system statistics
-- `GET /api/admin/users` - List all users
-- `POST /api/admin/users/:id` - Update user status
-- `GET /api/admin/settings` - Get system settings
-- `POST /api/admin/settings` - Update system settings
-
-### Database Structure
-
-#### Tables
-1. **users**
-   - id (serial, primary key)
-   - email (text, unique)
-   - hashedPassword (text)
-   - isAdmin (boolean)
-   - generationCredits (integer)
-   - createdAt (timestamp)
-
-2. **brand_names**
-   - id (serial, primary key)
-   - keywords (text[])
-   - category (text)
-   - generatedNames (jsonb)
-   - language (text)
-
-3. **name_generations**
-   - id (serial, primary key)
-   - userId (integer, foreign key)
-   - category (text)
-   - keywords (text[])
-   - count (integer)
-   - language (text)
-   - createdAt (timestamp)
-
-4. **premium_subscriptions**
-   - id (serial, primary key)
-   - userId (integer, foreign key)
-   - isActive (boolean)
-   - expiresAt (timestamp)
-   - createdAt (timestamp)
-
-### PostgreSQL Connection
-The application uses Neon's serverless PostgreSQL driver. Connection is configured through the `DATABASE_URL` environment variable and managed in `server/db.ts`.
-
-## 3️⃣ Frontend Setup
-
-### API Communication
-- Uses TanStack Query for data fetching and caching
-- API requests are centralized in `client/src/lib/queryClient.ts`
-- Type-safe API interactions using shared types from `shared/schema.ts`
-
-### Key Frontend Files
-```
 client/src/
 ├── components/      # Reusable UI components
 ├── hooks/          # Custom React hooks
@@ -138,9 +52,24 @@ client/src/
 - View generation statistics
 
 ### System Settings
-- Configure generation limits
-- Manage system parameters
-- Update email settings
+- Configure generation limits for different user types:
+  - Set maximum free generations for guest users
+  - Configure generation credits for registered users
+  - Adjust generation cooldown periods
+- Update system parameters:
+  - Guest generation limit (default: 5)
+  - Free user generation limit (default: 10)
+  - Premium user features
+- Manage email settings
+
+#### Managing Generation Limits
+1. Navigate to Admin Panel > System Settings
+2. Locate the following configuration options:
+   - `guest_limit`: Maximum generations allowed for guest users
+   - `free_user_limit`: Default credits for new registered users
+   - `generation_cooldown`: Time between generations (in seconds)
+3. Update the values as needed
+4. Changes take effect immediately for new generations
 
 ## 6️⃣ Environment Variables
 
@@ -153,12 +82,37 @@ SESSION_SECRET=        # Session encryption key
 
 Optional email configuration:
 ```
-SMTP_HOST=             # SMTP server host
-SMTP_PORT=             # SMTP server port
-SMTP_USER=             # SMTP username
-SMTP_PASS=             # SMTP password
-SMTP_FROM=             # Sender email address
+SMTP_HOST="smtp.example.com"
+SMTP_PORT=587
+SMTP_USER="your-smtp-username"
+SMTP_PASS="your-smtp-password"
+SMTP_FROM="noreply@example.com"
 ```
+
+#### Testing SMTP Configuration
+1. After setting up SMTP variables, verify the configuration:
+   ```bash
+   # Use the admin panel's email test feature
+   1. Navigate to Admin Panel > System Settings
+   2. Locate the Email Configuration section
+   3. Click "Test Email Configuration"
+   4. Enter a test email address
+   5. Check for success message and received email
+   ```
+2. Common SMTP providers and their settings:
+   - Gmail:
+     - Host: smtp.gmail.com
+     - Port: 587
+     - Required: App Password for 2FA accounts
+   - Amazon SES:
+     - Host: email-smtp.[region].amazonaws.com
+     - Port: 587
+     - Required: SMTP credentials from AWS Console
+   - SendGrid:
+     - Host: smtp.sendgrid.net
+     - Port: 587
+     - Required: API Key with mail send permissions
+
 
 ## 7️⃣ Deployment & Running the Project
 
@@ -209,16 +163,3 @@ npm run build
 2. Start the production server:
 ```bash
 npm start
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
