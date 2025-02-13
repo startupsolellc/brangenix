@@ -9,33 +9,20 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
 }
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY,
+  timeout: 10000, // 10 second timeout
+  maxRetries: 2
+});
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate 8 unique and creative brand names based on these keywords: ${keywords.join(", ")}. 
-       The names should be completely different from each other and memorable.
-       Return your response in this exact JSON format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
-    : `Bu anahtar kelimeleri kullanarak 8 benzersiz ve yaratıcı marka ismi üret: ${keywords.join(", ")}. 
-       İsimler birbirinden tamamen farklı ve akılda kalıcı olmalı.
-       Yanıtını tam olarak bu JSON formatında döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
+    ? `Generate 8 short and unique brand names using these keywords: ${keywords.join(", ")}. 
+       Return only a JSON object with 'names' array.`
+    : `Bu anahtar kelimeleri kullanarak 8 kısa ve benzersiz marka ismi üret: ${keywords.join(", ")}. 
+       Sadece 'names' dizisi içeren bir JSON nesnesi döndür.`;
 
-  const categoryGuidelines: Record<string, string> = {
-    "ecommerce": language === "en"
-      ? "\nMake names suitable for digital presence. Each name should be unique in the e-commerce space."
-      : "\nİsimler dijital varlığa uygun olmalı. Her isim e-ticaret alanında benzersiz olmalı.",
-    "finance": language === "en"
-      ? "\nCreate names that convey trust and innovation. Each name should be distinctive in the financial sector."
-      : "\nGüven ve yenilikçiliği yansıtan isimler oluşturun. Her isim finans sektöründe ayırt edici olmalı.",
-    "gaming": language === "en"
-      ? "\nGenerate dynamic, engaging names for gaming. Each name should stand out in the gaming industry."
-      : "\nOyun için dinamik ve ilgi çekici isimler oluşturun. Her isim oyun sektöründe öne çıkmalı."
-  };
-
-  const categoryKey = category.toLowerCase().split(".")[0];
-  const guideline = categoryGuidelines[categoryKey] || "";
-
-  return `${basePrompt}${guideline}`;
+  return basePrompt;
 };
 
 export function registerRoutes(app: Express) {
@@ -51,35 +38,38 @@ export function registerRoutes(app: Express) {
 
   app.post("/api/generate-names", async (req, res) => {
     try {
+      console.log("Starting name generation...");
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
+      console.log("Request params:", { keywords, category, language });
+
       const prompt = getCategoryPrompt(category, keywords, language);
+      console.log("Generated prompt:", prompt);
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: "You are a creative brand name generator. Generate exactly 8 unique and memorable names. Each name must be completely different from others in style and structure. Never repeat patterns or word combinations."
+            content: "You are a brand name generator. Return names in JSON format: {\"names\": [\"name1\", \"name2\", ...]}"
           },
           { role: "user", content: prompt }
         ],
-        temperature: 1.0, 
-        top_p: 1.0, 
-        max_tokens: 200,
-        frequency_penalty: 2.0, 
-        presence_penalty: 2.0 
+        temperature: 0.9,
+        max_tokens: 150
       });
 
+      console.log("OpenAI API response received");
       const content = response.choices[0].message.content;
       if (!content) {
         throw new Error("Empty response from OpenAI");
       }
 
-      console.log("OpenAI response:", content); 
+      console.log("OpenAI response content:", content);
 
       let result;
       try {
         result = JSON.parse(content);
+        console.log("Parsed result:", result);
       } catch (error) {
         console.error("Failed to parse OpenAI response:", content);
         throw new Error("Invalid JSON response from OpenAI");
@@ -92,8 +82,8 @@ export function registerRoutes(app: Express) {
       }
 
       const responseData = { names };
+      console.log("Final response data:", responseData);
 
-      
       await storage.createBrandName({
         keywords,
         category,
