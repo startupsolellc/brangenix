@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Palette } from "lucide-react";
+import { Palette, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PostcardDesign } from "./postcard-design";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 // Pre-selected Google Fonts
 const FONTS = [
@@ -70,7 +72,26 @@ export function BrandCard({ name }: BrandCardProps) {
   return (
     <Card className="w-full transform transition-all duration-200 hover:shadow-lg">
       <CardContent className="p-6 relative">
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 p-0"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <PostcardDesign 
+                name={name} 
+                color={color}
+                font={font}
+              />
+            </DialogContent>
+          </Dialog>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
