@@ -1,0 +1,35 @@
+chunk-WERSD76P.js?v=f2d8fb2d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:15 
+        
+        
+       POST https://4ceaaf22-7037-45b5-8d3a-5d0ebfb1c75a-00-1vrr436dbht02.riker.replit.dev/api/generate-names 500 (Internal Server Error)
+apiRequest @ queryClient.ts:15
+generateNames @ openai.ts:14
+queryFn @ results.tsx:22
+fetchFn @ @tanstack_react-query.js?v=f2d8fb2d:840
+run @ @tanstack_react-query.js?v=f2d8fb2d:494
+start @ @tanstack_react-query.js?v=f2d8fb2d:536
+fetch @ @tanstack_react-query.js?v=f2d8fb2d:926
+executeFetch_fn @ @tanstack_react-query.js?v=f2d8fb2d:2211
+onSubscribe @ @tanstack_react-query.js?v=f2d8fb2d:1898
+subscribe @ @tanstack_react-query.js?v=f2d8fb2d:24
+(anonymous) @ @tanstack_react-query.js?v=f2d8fb2d:3022
+subscribeToStore @ chunk-WERSD76P.js?v=f2d8fb2d:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f2d8fb2d:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f2d8fb2d:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f2d8fb2d:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f2d8fb2d:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f2d8fb2d:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f2d8fb2d:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f2d8fb2d:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f2d8fb2d:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f2d8fb2d:9119
+commitRootImpl @ chunk-WERSD76P.js?v=f2d8fb2d:19432
+commitRoot @ chunk-WERSD76P.js?v=f2d8fb2d:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=f2d8fb2d:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=f2d8fb2d:18718
+workLoop @ chunk-WERSD76P.js?v=f2d8fb2d:197
+flushWork @ chunk-WERSD76P.js?v=f2d8fb2d:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=f2d8fb2d:384
+Show 25 more frames
+Show less

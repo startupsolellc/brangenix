@@ -15,7 +15,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const nameGenerationCache = new Map<string, { names: string[], timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const MAX_CACHE_SIZE = 100;
-const MAX_HISTORY_SIZE = 20; // Maximum number of history records to keep
+const MAX_HISTORY_SIZE = 20;
 
 function getCacheKey(keywords: string[], category: string, language: string): string {
   return `${keywords.sort().join(",")}|${category}|${language}`;
@@ -31,47 +31,32 @@ function cleanOldCache() {
   });
 }
 
-// Category-specific prompts
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate 8 completely unique and creative brand names based on these keywords: ${keywords.join(", ")}. The names should be:
-       - Completely different from each other
-       - Memorable and easy to pronounce
-       - Relevant to ${category} industry
-       - Avoid common naming patterns or overused suffixes
-       - Each name should have a unique character/style
-       Return exactly 8 names in a JSON array format.`
-    : `Şu anahtar kelimeleri kullanarak 8 adet tamamen benzersiz ve yaratıcı marka ismi üret: ${keywords.join(", ")}. İsimler:
-       - Birbirinden tamamen farklı olmalı
-       - Akılda kalıcı ve telaffuzu kolay olmalı
-       - ${category} sektörüne uygun olmalı
-       - Sık kullanılan kalıplardan veya eklerden kaçınmalı
-       - Her isim kendine özgü bir karakter/stile sahip olmalı
-       JSON dizi formatında tam 8 isim döndür.`;
+    ? `Generate 8 unique brand names based on these keywords: ${keywords.join(", ")}. Return response in this exact format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
+    : `Bu anahtar kelimeleri kullanarak 8 benzersiz marka ismi üret: ${keywords.join(", ")}. Yanıtı tam olarak bu formatta döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
-  // Kategori özel kuralları
   const categoryGuidelines: Record<string, string> = {
     "ecommerce": language === "en"
-      ? "Make names suitable for digital presence and e-commerce platforms. Avoid generic terms like 'shop' or 'store'."
-      : "İsimler dijital varlık ve e-ticaret platformlarına uygun olmalı. 'shop' veya 'store' gibi genel terimlerden kaçının.",
+      ? "\nMake names suitable for digital presence. Avoid generic terms."
+      : "\nİsimler dijital varlığa uygun olmalı. Genel terimlerden kaçının.",
     "finance": language === "en"
-      ? "Create names that convey trust, reliability, and innovation in financial services. Avoid common fintech naming patterns."
-      : "Finansal hizmetlerde güven, güvenilirlik ve yenilikçiliği yansıtan isimler oluşturun. Yaygın fintech isimlendirme kalıplarından kaçının.",
+      ? "\nCreate names that convey trust and innovation."
+      : "\nGüven ve yenilikçiliği yansıtan isimler oluşturun.",
     "gaming": language === "en"
-      ? "Generate dynamic, engaging names suitable for gaming and entertainment. Each name should feel unique in the gaming space."
-      : "Oyun ve eğlence için uygun, dinamik ve ilgi çekici isimler oluşturun. Her isim oyun alanında benzersiz olmalı."
+      ? "\nGenerate dynamic, engaging names for gaming."
+      : "\nOyun için dinamik ve ilgi çekici isimler oluşturun."
   };
 
   const categoryKey = category.toLowerCase().split(".")[0];
   const guideline = categoryGuidelines[categoryKey] || "";
 
-  return `${basePrompt}\n${guideline}`;
+  return `${basePrompt}${guideline}`;
 };
 
 export function registerRoutes(app: Express) {
   app.get("/api/brand-names", async (_req, res) => {
     try {
-      // Get only the last 20 brand names
       const brandNames = await storage.getBrandNames(MAX_HISTORY_SIZE);
       res.json(brandNames);
     } catch (error) {
@@ -95,7 +80,6 @@ export function registerRoutes(app: Express) {
       // Clean old cache entries
       cleanOldCache();
 
-      // Generate new names if not in cache
       const prompt = getCategoryPrompt(category, keywords, language);
 
       const response = await openai.chat.completions.create({
@@ -103,24 +87,22 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: `You are a creative brand name generator specialized in creating unique, memorable names.
-                     Each name you generate must be completely different from others.
-                     Never repeat patterns or similar word combinations.
-                     Focus on creating distinctive and original names.`
+            content: "You are a brand name generator. Generate exactly 8 unique names and return them in JSON format with a 'names' array."
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.95, // Daha yaratıcı sonuçlar için artırıldı
-        top_p: 0.95, // Çeşitliliği artırmak için yükseltildi
+        temperature: 0.9,
+        response_format: { type: "json_object" }, // Force JSON response
         max_tokens: 150,
-        frequency_penalty: 1.0, // Tekrarı önlemek için maksimum değer
-        presence_penalty: 0.8 // Yeni kelime kullanımını teşvik etmek için yüksek değer
+        frequency_penalty: 0.8
       });
 
       const content = response.choices[0].message.content;
       if (!content) {
         throw new Error("Empty response from OpenAI");
       }
+
+      console.log("OpenAI response:", content); // Debug log
 
       let result;
       try {
@@ -130,14 +112,17 @@ export function registerRoutes(app: Express) {
         throw new Error("Invalid JSON response from OpenAI");
       }
 
-      if (!result.names || !Array.isArray(result.names) || result.names.length !== 8) {
+      // Handle both array and object formats
+      const names = Array.isArray(result) ? result : result.names;
+      if (!Array.isArray(names)) {
         console.error("Invalid response structure:", result);
         throw new Error("Invalid response format from OpenAI");
       }
 
+      const responseData = { names };
+
       // Store in cache
       if (nameGenerationCache.size >= MAX_CACHE_SIZE) {
-        // Remove oldest entry if cache is full
         const entries = Array.from(nameGenerationCache.entries());
         if (entries.length > 0) {
           const [oldestKey] = entries[0];
@@ -146,18 +131,19 @@ export function registerRoutes(app: Express) {
       }
 
       nameGenerationCache.set(cacheKey, {
-        names: result.names,
+        names: responseData.names,
         timestamp: Date.now()
       });
 
+      // Store in database
       await storage.createBrandName({
         keywords,
         category,
-        generatedNames: result.names,
+        generatedNames: responseData.names,
         language
       });
 
-      res.json(result);
+      res.json(responseData);
     } catch (error) {
       console.error("Error generating names:", error);
       res.status(500).json({ message: "Error generating names" });
