@@ -88,11 +88,12 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Email already registered" });
       }
 
-      // Create new user
+      // Create new user with initial credits
       const hashedPassword = await hashPassword(password);
       const user = await storage.createUser({
         email,
-        hashedPassword
+        hashedPassword,
+        generationCredits: 5 // Set initial credits for new users
       });
 
       // Log the user in
