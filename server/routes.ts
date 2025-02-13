@@ -17,19 +17,22 @@ export function registerRoutes(app: Express) {
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
       const prompt = language === "en"
-        ? `Generate 4 unique, brandable, and category-appropriate names for a ${category} company using keywords: ${keywords.join(", ")}. Names must be professional and catchy. Respond with JSON in this format: { "names": string[] }`
-        : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 4 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı. JSON formatında yanıt ver: { "names": string[] }`;
+        ? `Generate 4 unique, brandable, and category-appropriate names for a ${category} company using keywords: ${keywords.join(", ")}. Names must be professional and catchy. Only respond with a JSON array containing exactly 4 names, like this: {"names": ["name1", "name2", "name3", "name4"]}`
+        : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 4 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı. Sadece 4 isim içeren bir JSON dizisi olarak yanıt ver, örneğin: {"names": ["isim1", "isim2", "isim3", "isim4"]}`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
-          { role: "system", content: "You are a professional brand name generator." },
+          { role: "system", content: "You are a professional brand name generator. Always respond with valid JSON." },
           { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" }
+        ]
       });
 
-      const result = JSON.parse(response.choices[0].message.content);
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+
+      if (!result.names || !Array.isArray(result.names) || result.names.length !== 4) {
+        throw new Error("Invalid response format from OpenAI");
+      }
 
       await storage.createBrandName({
         keywords,
