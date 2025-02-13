@@ -1,0 +1,73 @@
+chunk-WERSD76P.js?v=79255f79:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 401 (Unauthorized)
+openai.ts:42 Name generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+/api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 401 (Unauthorized)
+openai.ts:42 Name generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+/api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 401 (Unauthorized)
+openai.ts:42 Name generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+results.tsx:61 Generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+(anonim) @ results.tsx:61
+/api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+openai.ts:42 Name generation error: Error: 500: {"message":"Error generating names","error":"Failed to track generation","details":"Error: Failed to track generation\n    at DatabaseStorage.trackGeneration (/home/runner/workspace/server/storage.ts:78:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async <anonymous> (/home/runner/workspace/server/routes.ts:128:9)"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+/api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+openai.ts:42 Name generation error: Error: 500: {"message":"Error generating names","error":"Failed to track generation","details":"Error: Failed to track generation\n    at DatabaseStorage.trackGeneration (/home/runner/workspace/server/storage.ts:78:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async <anonymous> (/home/runner/workspace/server/routes.ts:128:9)"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+/api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+openai.ts:42 Name generation error: Error: 500: {"message":"Error generating names","error":"Failed to track generation","details":"Error: Failed to track generation\n    at DatabaseStorage.trackGeneration (/home/runner/workspace/server/storage.ts:78:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async <anonymous> (/home/runner/workspace/server/routes.ts:128:9)"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+results.tsx:61 Generation error: Error: 500: {"message":"Error generating names","error":"Failed to track generation","details":"Error: Failed to track generation\n    at DatabaseStorage.trackGeneration (/home/runner/workspace/server/storage.ts:78:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async <anonymous> (/home/runner/workspace/server/routes.ts:128:9)"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+(anonim) @ results.tsx:61
