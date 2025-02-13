@@ -33,8 +33,10 @@ function cleanOldCache() {
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate 8 unique brand names based on these keywords: ${keywords.join(", ")}. Return response in this exact format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
-    : `Bu anahtar kelimeleri kullanarak 8 benzersiz marka ismi üret: ${keywords.join(", ")}. Yanıtı tam olarak bu formatta döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
+    ? `Generate 8 unique brand names based on these keywords: ${keywords.join(", ")}. 
+       Return your response in this exact JSON format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
+    : `Bu anahtar kelimeleri kullanarak 8 benzersiz marka ismi üret: ${keywords.join(", ")}. 
+       Yanıtını tam olarak bu JSON formatında döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
   const categoryGuidelines: Record<string, string> = {
     "ecommerce": language === "en"
@@ -87,12 +89,11 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator. Generate exactly 8 unique names and return them in JSON format with a 'names' array."
+            content: "You are a brand name generator. Generate exactly 8 unique names and return them in JSON format with a 'names' array. Each name should be completely different from others."
           },
           { role: "user", content: prompt }
         ],
         temperature: 0.9,
-        response_format: { type: "json_object" }, // Force JSON response
         max_tokens: 150,
         frequency_penalty: 0.8
       });
