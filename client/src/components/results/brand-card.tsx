@@ -60,8 +60,8 @@ export function BrandCard({ name }: BrandCardProps) {
   }, [showColorPicker]);
 
   return (
-    <Card className="w-full transform transition-all duration-200 hover:shadow-lg">
-      <CardContent className="p-6 relative">
+    <Card className="h-full transform transition-all duration-200 hover:shadow-lg bg-white">
+      <CardContent className="p-6 relative h-full flex items-center justify-center">
         <div className="absolute top-4 right-4">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -98,7 +98,7 @@ export function BrandCard({ name }: BrandCardProps) {
         </div>
 
         <h3 
-          className="text-3xl text-center break-words mt-4"
+          className="text-2xl md:text-3xl text-center break-words px-4"
           style={{ 
             color, 
             fontFamily: font || 'system-ui',

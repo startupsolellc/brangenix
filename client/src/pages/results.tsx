@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { BrandCard } from "@/components/results/brand-card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { generateNames } from "@/lib/openai";
 import { translations, type Language } from "@/lib/i18n";
-import { useToast } from "@/hooks/use-toast";
 
 export default function Results() {
   const [, setLocation] = useLocation();
   const [cooldown, setCooldown] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
 
   const searchParams = new URLSearchParams(window.location.search);
   const keywords = searchParams.get("keywords")?.split(",") || [];
@@ -52,8 +50,8 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen gradient-bg p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen gradient-bg px-4 py-8">
+      <div className="max-w-[1200px] mx-auto space-y-8">
         <h1 className="text-4xl font-jost font-bold text-center mb-8">
           {translations[language].title}
         </h1>
@@ -76,7 +74,9 @@ export default function Results() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data?.names.map((name, index) => (
-            <BrandCard key={index} name={name} />
+            <div key={index} className="aspect-[4/3] w-full">
+              <BrandCard name={name} />
+            </div>
           ))}
         </div>
       </div>
