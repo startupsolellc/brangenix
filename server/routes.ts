@@ -88,10 +88,10 @@ export function registerRoutes(app: Express) {
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.7, // Increase creativity
-        top_p: 0.8, // Increase diversity in responses
+        temperature: 0.9, // Increase creativity further
+        top_p: 0.9, // Increase diversity further
         max_tokens: 150,
-        frequency_penalty: 0.5 // Reduce repeated names
+        frequency_penalty: 0.8 // Increase penalty for repetition
       });
 
       const content = response.choices[0].message.content;
