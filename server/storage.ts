@@ -18,7 +18,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const [brandName] = await db
         .insert(brandNames)
-        .values(insertBrandName)
+        .values([insertBrandName])
         .returning();
 
       if (!brandName) {

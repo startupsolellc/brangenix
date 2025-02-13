@@ -52,7 +52,7 @@ export function setupAuth(app: Express) {
         if (!user) {
           return done(null, false, { message: 'Invalid email or password' });
         }
-        
+
         const isValid = await comparePasswords(password, user.hashedPassword);
         if (!isValid) {
           return done(null, false, { message: 'Invalid email or password' });
@@ -98,6 +98,7 @@ export function setupAuth(app: Express) {
       // Log the user in
       req.login(user, (err) => {
         if (err) {
+          console.error("Login error after registration:", err);
           return res.status(500).json({ message: "Error logging in after registration" });
         }
         return res.status(201).json(user);
