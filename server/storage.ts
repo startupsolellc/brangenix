@@ -156,6 +156,11 @@ export class DatabaseStorage implements IStorage {
 
       console.log(`Current credits for user ${userId}: ${currentUser?.credits}`);
 
+      if (!currentUser || currentUser.credits <= 0) {
+        console.log(`No credits available for user ${userId}`);
+        throw new Error("No credits available");
+      }
+
       const result = await db
         .update(users)
         .set({
@@ -172,14 +177,14 @@ export class DatabaseStorage implements IStorage {
       console.log(`Update result for user ${userId}:`, result);
 
       if (!result.length) {
-        console.log(`No credits were decremented for user ${userId} - possibly at 0`);
-        throw new Error("No credits available");
+        console.log(`Failed to decrement credits for user ${userId}`);
+        throw new Error("Failed to decrement credits");
       }
 
       console.log(`Successfully decremented credits for user ${userId}. New value: ${result[0].updatedCredits}`);
     } catch (error) {
       console.error("Error decrementing generation credits:", error);
-      throw new Error("Failed to decrement generation credits");
+      throw error instanceof Error ? error : new Error("Failed to decrement generation credits");
     }
   }
 }

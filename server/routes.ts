@@ -51,7 +51,7 @@ app.post("/api/generate-names", async (req, res) => {
   try {
     const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
-    // Check usage limits and handle credit deduction upfront
+    // Check basic auth requirements first
     if (!req.user) {
       // Guest user - check localStorage token from headers
       const guestToken = req.headers['x-guest-token'];
@@ -62,19 +62,17 @@ app.post("/api/generate-names", async (req, res) => {
         });
       }
     } else {
-      // For logged-in users, check premium status and handle credits first
-      const isPremium = await storage.isPremiumUser(req.user.id);
-      if (!isPremium) {
-        try {
-          // Attempt to decrement credits before generating names
-          await storage.decrementGenerationCredits(req.user.id);
-        } catch (error) {
-          console.log("Credit deduction failed:", error);
-          return res.status(403).json({
-            message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
-            code: "UPGRADE_REQUIRED"
-          });
-        }
+      // For logged-in users, check premium status and credits availability
+      const [user, isPremium] = await Promise.all([
+        storage.getUserById(req.user.id),
+        storage.isPremiumUser(req.user.id)
+      ]);
+
+      if (!isPremium && (!user?.generationCredits || user.generationCredits <= 0)) {
+        return res.status(403).json({
+          message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
+          code: "UPGRADE_REQUIRED"
+        });
       }
     }
 
@@ -127,14 +125,25 @@ app.post("/api/generate-names", async (req, res) => {
       names.push(`Brand${names.length + 1}`);
     }
 
-    // Only track generation after successful name generation
+    // Now that we have successfully generated names, handle credit deduction
     if (req.user) {
+      const isPremium = await storage.isPremiumUser(req.user.id);
+      if (!isPremium) {
+        try {
+          await storage.decrementGenerationCredits(req.user.id);
+        } catch (error) {
+          console.error("Failed to decrement credits:", error);
+          return res.status(403).json({
+            message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
+            code: "UPGRADE_REQUIRED"
+          });
+        }
+      }
+      // Track the generation only after successful credit deduction
       await storage.trackGeneration(req.user.id);
     }
 
-    const responseData = { names };
-    console.log("Final response data:", responseData);
-
+    // Save the generated names
     await storage.createBrandName({
       keywords,
       category,
@@ -142,7 +151,10 @@ app.post("/api/generate-names", async (req, res) => {
       language
     });
 
+    const responseData = { names };
+    console.log("Final response data:", responseData);
     res.json(responseData);
+
   } catch (error) {
     console.error("Error generating names:", error);
     res.status(500).json({
