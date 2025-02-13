@@ -46,6 +46,10 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
 
   const selectedInfo = getSelectedInfo();
 
+  const placeholderText = language === "tr" 
+    ? "E-ticaret, Dropshipping, Amazon, Giyim vb."
+    : "E-commerce, Dropshipping, Amazon, Clothing etc.";
+
   return (
     <div className="space-y-4">
       {/* Selected Categories Display */}
@@ -83,10 +87,10 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
       <div className="relative">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder={translations[language].searchCategories}
+          placeholder={placeholderText}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
+          className="pl-9 text-sm md:text-base w-full"
         />
       </div>
 
