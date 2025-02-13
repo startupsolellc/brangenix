@@ -3,12 +3,13 @@ import { Home, LayoutDashboard, Globe, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type Language, translations } from "@/lib/i18n";
 
 export function Navigation() {
   const [location] = useLocation();
-  const [language, setLanguage] = useState<Language>("en");
+  const storedLanguage = localStorage.getItem("preferred-language") as Language;
+  const [language, setLanguage] = useState<Language>(storedLanguage || "en");
 
   const handleLanguageChange = (value: Language) => {
     setLanguage(value);
@@ -22,9 +23,9 @@ export function Navigation() {
         <Button
           variant={location === "/" ? "default" : "ghost"}
           size="sm"
-          className="flex items-center gap-2 rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
+          className="flex items-center gap-2"
         >
-          <Home className="h-4 w-4 text-white" />
+          <Home className="h-4 w-4" />
           Home
         </Button>
       </Link>
@@ -33,9 +34,9 @@ export function Navigation() {
         <Button
           variant={location === "/dashboard" ? "default" : "ghost"}
           size="sm"
-          className="flex items-center gap-2 rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
+          className="flex items-center gap-2"
         >
-          <LayoutDashboard className="h-4 w-4 text-white" />
+          <LayoutDashboard className="h-4 w-4" />
           Dashboard
         </Button>
       </Link>
@@ -44,10 +45,10 @@ export function Navigation() {
 
   const LanguageSelector = () => (
     <Select value={language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[140px] rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700 border-none">
+      <SelectTrigger className="w-[140px]">
         <SelectValue>
           <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4 text-white" />
+            <Globe className="h-4 w-4" />
             {language === "en" ? "English" : "Türkçe"}
           </div>
         </SelectValue>
@@ -88,12 +89,8 @@ export function Navigation() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
-              >
-                <Menu className="h-6 w-6 text-white" />
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
             <SheetContent>

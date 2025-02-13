@@ -60,6 +60,7 @@ export default function Results() {
           <Button
             variant="outline"
             onClick={() => setLocation("/")}
+            className="rounded-full hover:shadow-md transition-all duration-200"
           >
             {translations[language].createNew}
           </Button>
@@ -67,6 +68,7 @@ export default function Results() {
           <Button
             onClick={handleGenerateNew}
             disabled={cooldown}
+            className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
           >
             {translations[language].generateNew}
           </Button>

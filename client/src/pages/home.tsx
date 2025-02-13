@@ -74,7 +74,10 @@ export default function Home() {
           />
 
           <div className="flex justify-end">
-            <Button onClick={handleSubmit}>
+            <Button 
+              onClick={handleSubmit}
+              className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
+            >
               {translations[language].generate}
             </Button>
           </div>
