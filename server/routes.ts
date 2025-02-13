@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import { storage } from "./storage";
 import { generateNamesSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
@@ -241,18 +241,20 @@ export async function registerRoutes(app: Express) {
 
   const httpServer = createServer(app);
 
-  // Set up WebSocket server on a separate path to avoid conflicts with Vite
+  // Create WebSocket server on a separate path
   const wss = new WebSocketServer({
     server: httpServer,
     path: '/ws'
   });
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws: WebSocket) => {
     console.log('WebSocket client connected');
 
-    ws.on('message', (message) => {
-      console.log('received: %s', message);
+    ws.on('message', (message: string) => {
+      console.log('received:', message.toString());
     });
+
+    ws.on('error', console.error);
 
     ws.on('close', () => {
       console.log('WebSocket client disconnected');
