@@ -83,7 +83,7 @@ export default function Results() {
 
   return (
     <div className="min-h-screen gradient-bg">
-      <div className="pt-24 px-4 md:px-8">
+      <div className="pt-32 px-4 md:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <h1 className="title text-center">
             {translations[language].title}
