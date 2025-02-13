@@ -17,8 +17,8 @@ export function registerRoutes(app: Express) {
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
       const prompt = language === "en"
-        ? `Generate 4 unique, brandable, and category-appropriate names for a ${category} company using keywords: ${keywords.join(", ")}. Names must be professional and catchy. Only respond with a JSON array containing exactly 4 names, like this: {"names": ["name1", "name2", "name3", "name4"]}`
-        : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 4 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı. Sadece 4 isim içeren bir JSON dizisi olarak yanıt ver, örneğin: {"names": ["isim1", "isim2", "isim3", "isim4"]}`;
+        ? `Generate 8 unique, brandable, and category-appropriate names for a ${category} company using keywords: ${keywords.join(", ")}. Names must be professional and catchy. Only respond with a JSON array containing exactly 8 names, like this: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
+        : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 8 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı. Sadece 8 isim içeren bir JSON dizisi olarak yanıt ver, örneğin: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4",
@@ -30,7 +30,7 @@ export function registerRoutes(app: Express) {
 
       const result = JSON.parse(response.choices[0].message.content || "{}");
 
-      if (!result.names || !Array.isArray(result.names) || result.names.length !== 4) {
+      if (!result.names || !Array.isArray(result.names) || result.names.length !== 8) {
         throw new Error("Invalid response format from OpenAI");
       }
 
