@@ -21,19 +21,21 @@ export default function Results() {
   const language = (searchParams.get("language") || "en") as Language;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["/api/generate-names", keywords.join(","), category, language, Date.now()], // Add timestamp
+    queryKey: ["/api/generate-names", keywords.join(","), category, language],
     queryFn: () => generateNames({ keywords, category, language }),
-    retry: 2,
+    retry: 3,
+    retryDelay: 1000,
     gcTime: 0,
     refetchOnWindowFocus: false
   });
 
   useEffect(() => {
     if (error) {
+      console.error("Generation error:", error);
       toast({
         variant: "destructive",
         title: translations[language].errors.generation,
-        description: error instanceof Error ? error.message : "Unknown error occurred"
+        description: error instanceof Error ? error.message : "Failed to generate names. Please try again."
       });
     }
   }, [error, language, toast]);
@@ -46,8 +48,13 @@ export default function Results() {
 
     try {
       await queryClient.invalidateQueries({ queryKey: ["/api/generate-names"] });
-      await refetch();
+      const result = await refetch();
+
+      if (result.error) {
+        throw result.error;
+      }
     } catch (error) {
+      console.error("Failed to generate new names:", error);
       toast({
         variant: "destructive",
         title: translations[language].errors.generation,
@@ -57,7 +64,7 @@ export default function Results() {
       setTimeout(() => {
         setCooldown(false);
         setIsGenerating(false);
-      }, 8000);
+      }, 5000); // Reduced cooldown time
     }
   };
 

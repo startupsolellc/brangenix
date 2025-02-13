@@ -17,12 +17,12 @@ const openai = new OpenAI({
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate exactly 8 unique and creative brand names using these keywords: ${keywords.join(", ")}.
-       Make them short, memorable, and ensure each name is completely different in style.
-       Return response in this format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
-    : `Bu anahtar kelimeleri kullanarak tam 8 benzersiz ve yaratıcı marka ismi üret: ${keywords.join(", ")}.
-       İsimler kısa, akılda kalıcı ve her biri farklı stilde olmalı.
-       Yanıtı bu formatta döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
+    ? `Generate 8 unique brand names using these keywords: ${keywords.join(", ")}.
+       Make them different and creative.
+       Format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
+    : `Bu anahtar kelimeleri kullanarak 8 benzersiz marka ismi üret: ${keywords.join(", ")}.
+       Her biri farklı ve yaratıcı olsun.
+       Format: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
   return basePrompt;
 };
@@ -52,19 +52,21 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator. Always respond with valid JSON containing exactly 8 names in an array. Each name must be unique and creative, never repeat patterns or styles."
+            content: "You are a brand name generator. Respond with exactly 8 unique names in JSON format."
           },
           { role: "user", content: prompt }
         ],
-        temperature: 1.2,           // Increased for more randomness
-        max_tokens: 256,
-        presence_penalty: 1.0,      // Increased to discourage repetition
-        frequency_penalty: 1.0,     // Increased to discourage repetition
-        response_format: { type: "json_object" }  // Enforce JSON response
+        temperature: 0.8,
+        max_tokens: 150,
+        presence_penalty: 0.3,
+        frequency_penalty: 0.3,
+        response_format: { type: "json_object" }
       });
 
       console.log("OpenAI API response received");
       const content = response.choices[0].message.content;
+      console.log("Raw API response:", content);
+
       if (!content) {
         throw new Error("Empty response from OpenAI");
       }
@@ -72,6 +74,7 @@ export function registerRoutes(app: Express) {
       let parsedContent;
       try {
         parsedContent = JSON.parse(content.trim());
+        console.log("Parsed content:", parsedContent);
       } catch (error) {
         console.error("Failed to parse OpenAI response:", content);
         throw new Error("Invalid JSON response from OpenAI");
@@ -82,7 +85,6 @@ export function registerRoutes(app: Express) {
         throw new Error("Invalid response format from OpenAI");
       }
 
-      // Ensure exactly 8 names
       const names = parsedContent.names.slice(0, 8);
       while (names.length < 8) {
         names.push(`Brand${names.length + 1}`);
@@ -103,7 +105,8 @@ export function registerRoutes(app: Express) {
       console.error("Error generating names:", error);
       res.status(500).json({ 
         message: "Error generating names",
-        error: error instanceof Error ? error.message : "Unknown error occurred"
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+        details: error instanceof Error ? error.stack : undefined
       });
     }
   });
