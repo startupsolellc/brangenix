@@ -50,8 +50,8 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen gradient-bg px-4 py-8">
-      <div className="max-w-[1200px] mx-auto space-y-8">
+    <div className="min-h-screen gradient-bg p-4 md:p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         <h1 className="text-4xl font-jost font-bold text-center mb-8">
           {translations[language].title}
         </h1>
@@ -74,9 +74,7 @@ export default function Results() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data?.names.map((name, index) => (
-            <div key={index} className="aspect-[4/3] w-full">
-              <BrandCard name={name} />
-            </div>
+            <BrandCard key={index} name={name} />
           ))}
         </div>
       </div>

@@ -42,10 +42,9 @@ export function BrandCard({ name }: BrandCardProps) {
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setColor(e.target.value);
-    setShowColorPicker(false); // Close the color picker after selection
+    setShowColorPicker(false);
   };
 
-  // Close color picker when clicking outside
   useEffect(() => {
     if (!showColorPicker) return;
 
@@ -60,8 +59,8 @@ export function BrandCard({ name }: BrandCardProps) {
   }, [showColorPicker]);
 
   return (
-    <Card className="h-full transform transition-all duration-200 hover:shadow-lg bg-white">
-      <CardContent className="p-6 relative h-full flex items-center justify-center">
+    <Card className="w-full transform transition-all duration-200 hover:shadow-lg">
+      <CardContent className="p-6 relative">
         <div className="absolute top-4 right-4">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -70,7 +69,7 @@ export function BrandCard({ name }: BrandCardProps) {
                 size="icon"
                 className="h-8 w-8 p-0"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent the click from bubbling up
+                  e.stopPropagation();
                   setShowColorPicker(!showColorPicker);
                 }}
               >
@@ -85,7 +84,7 @@ export function BrandCard({ name }: BrandCardProps) {
           {showColorPicker && (
             <div 
               className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 z-50"
-              onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
+              onClick={(e) => e.stopPropagation()}
             >
               <input
                 type="color"
@@ -98,7 +97,7 @@ export function BrandCard({ name }: BrandCardProps) {
         </div>
 
         <h3 
-          className="text-2xl md:text-3xl text-center break-words px-4"
+          className="text-3xl text-center break-words mt-4"
           style={{ 
             color, 
             fontFamily: font || 'system-ui',
