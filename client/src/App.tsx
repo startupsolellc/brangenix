@@ -8,6 +8,7 @@ import Results from "@/pages/results";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth";
+import ComingSoonPage from "@/pages/coming-soon";
 import { Navigation } from "@/components/navigation";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/results" component={Results} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/coming-soon" component={ComingSoonPage} />
       <Route component={NotFound} />
     </Switch>
   );

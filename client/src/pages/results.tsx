@@ -141,9 +141,9 @@ export default function Results() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {data?.names?.map((name, index) => (
-              <BrandCard 
-                key={`${name}-${Date.now()}-${Math.random()}`} 
-                name={name} 
+              <BrandCard
+                key={`${name}-${Date.now()}-${Math.random()}`}
+                name={name}
               />
             ))}
           </div>
@@ -164,7 +164,7 @@ export default function Results() {
             <AlertDialogAction
               onClick={() => {
                 setShowLimitDialog(false);
-                setLocation("/auth");
+                setLocation(guestToken ? "/auth" : "/coming-soon");
               }}
             >
               {guestToken ? "Sign In" : "Upgrade Now"}
