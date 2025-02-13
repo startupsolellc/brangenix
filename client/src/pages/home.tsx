@@ -52,8 +52,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
+      <div className="w-full max-w-3xl space-y-8">
+        <div className="text-center pt-16">
           <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white mb-2">
             {translations[language].title}
           </h1>
@@ -74,7 +74,7 @@ export default function Home() {
           />
 
           <div className="flex justify-end">
-            <Button 
+            <Button
               onClick={handleSubmit}
               className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
             >

@@ -37,28 +37,28 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
         />
       </div>
 
-      <ScrollArea className="h-[300px] rounded-md border">
+      <ScrollArea className="h-[400px] rounded-md border"> {/* Increased height */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           {filteredCategories.map((category) => (
             <Card
               key={category.id}
-              className={`cursor-pointer transition-all duration-200 ${
-                value === category.id ? "border-primary" : ""
+              className={`cursor-pointer transition-all duration-200 hover:bg-gray-50 ${
+                value === category.id ? "border-primary ring-2 ring-primary/20" : ""
               }`}
               onClick={() => onChange(category.id)}
             >
-              <CardHeader>
+              <CardHeader className="p-4"> {/* Adjusted padding */}
                 <h3 className="text-sm font-medium">
                   {language === "tr" ? category.nameInTurkish : category.name}
                 </h3>
                 {value === category.id && category.subcategories.length > 0 && (
-                  <div className="mt-2 space-y-1">
+                  <div className="mt-3 space-y-1 border-t pt-2"> {/* Added border and padding */}
                     {category.subcategories.map((sub) => (
                       <Button
                         key={sub.id}
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-xs"
+                        className="w-full justify-start text-xs hover:bg-gray-100"
                         onClick={(e) => {
                           e.stopPropagation();
                           onChange(`${category.id}.${sub.id}`);
