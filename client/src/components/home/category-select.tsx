@@ -90,7 +90,7 @@ export function CategorySelect({ value, onChange, language }: CategorySelectProp
           placeholder={placeholderText}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 text-sm md:text-base w-full"
+          className="pl-9 text-xs sm:text-sm md:text-base w-full"
         />
       </div>
 
