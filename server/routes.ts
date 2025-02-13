@@ -38,7 +38,7 @@ const getCategoryPrompt = (category: string, keywords: string[], language: strin
   return basePrompt;
 };
 
-export function registerRoutes(app: Express) {
+export async function registerRoutes(app: Express) {
   // Set up authentication routes
   setupAuth(app);
 
@@ -102,17 +102,17 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // Existing routes...
-  app.get("/api/brand-names", async (_req, res) => {
+  app.get("/api/admin/activity", isAdmin, async (req, res) => {
     try {
-      const brandNames = await storage.getBrandNames(20);
-      res.json(brandNames);
+      const activities = await storage.getRecentActivity();
+      res.json(activities);
     } catch (error) {
-      console.error("Error fetching brand names:", error);
-      res.status(500).json({ message: "Error fetching brand names" });
+      console.error("Error fetching activity:", error);
+      res.status(500).json({ message: "Error fetching activity" });
     }
   });
 
+  // Name generation endpoint
   app.post("/api/generate-names", async (req, res) => {
     try {
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
@@ -127,10 +127,13 @@ export function registerRoutes(app: Express) {
           });
         }
 
+        // Get guest limit from system settings
+        const guestLimitSetting = await storage.getSystemSetting("guest_limit");
+        const GUEST_LIMIT = guestLimitSetting ? Number(guestLimitSetting.value) : 5;
+
         // Get current guest generations from header
         const guestGenerations = parseInt(req.headers['x-guest-generations'] as string) || 0;
 
-        // Only block if they've already used all generations
         if (guestGenerations >= GUEST_LIMIT) {
           return res.status(403).json({
             message: "Guest generation limit reached",
@@ -155,12 +158,7 @@ export function registerRoutes(app: Express) {
         }
       }
 
-      console.log("Starting name generation...");
-      console.log("Request params:", { keywords, category, language });
-
       const prompt = getCategoryPrompt(category, keywords, language);
-      console.log("Generated prompt:", prompt);
-
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -177,9 +175,7 @@ export function registerRoutes(app: Express) {
         response_format: { type: "json_object" }
       });
 
-      console.log("OpenAI API response received");
       const content = response.choices[0].message.content;
-      console.log("Raw API response:", content);
 
       if (!content) {
         throw new Error("Empty response from OpenAI");
@@ -188,7 +184,6 @@ export function registerRoutes(app: Express) {
       let parsedContent;
       try {
         parsedContent = JSON.parse(content.trim());
-        console.log("Parsed content:", parsedContent);
       } catch (error) {
         console.error("Failed to parse OpenAI response:", content);
         throw new Error("Invalid JSON response from OpenAI");
@@ -208,15 +203,7 @@ export function registerRoutes(app: Express) {
       if (req.user) {
         const isPremium = await storage.isPremiumUser(req.user.id);
         if (!isPremium) {
-          try {
-            await storage.decrementGenerationCredits(req.user.id);
-          } catch (error) {
-            console.error("Failed to decrement credits:", error);
-            return res.status(403).json({
-              message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
-              code: "UPGRADE_REQUIRED"
-            });
-          }
+          await storage.decrementGenerationCredits(req.user.id);
         }
         await storage.trackGeneration(req.user.id);
       }
@@ -229,9 +216,7 @@ export function registerRoutes(app: Express) {
         language
       });
 
-      const responseData = { names };
-      console.log("Final response data:", responseData);
-      res.json(responseData);
+      res.json({ names });
 
     } catch (error) {
       console.error("Error generating names:", error);
@@ -242,6 +227,17 @@ export function registerRoutes(app: Express) {
       });
     }
   });
+
+  app.get("/api/brand-names", async (_req, res) => {
+    try {
+      const brandNames = await storage.getBrandNames(20);
+      res.json(brandNames);
+    } catch (error) {
+      console.error("Error fetching brand names:", error);
+      res.status(500).json({ message: "Error fetching brand names" });
+    }
+  });
+
 
   return createServer(app);
 }
