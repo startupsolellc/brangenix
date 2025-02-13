@@ -9,7 +9,7 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
 }
 
-const openai = new OpenAI({ 
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   timeout: 30000, // 30 second timeout
   maxRetries: 3
@@ -17,11 +17,13 @@ const openai = new OpenAI({
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate 8 unique brand names using these keywords: ${keywords.join(", ")}.
-       Make them different and creative.
+    ? `Generate 8 unique and diverse brand names using these keywords: ${keywords.join(", ")}.
+       Each name must be completely different from others.
+       Never use the same prefix or suffix between names.
        Format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
-    : `Bu anahtar kelimeleri kullanarak 8 benzersiz marka ismi üret: ${keywords.join(", ")}.
-       Her biri farklı ve yaratıcı olsun.
+    : `Bu anahtar kelimeleri kullanarak 8 tamamen farklı marka ismi üret: ${keywords.join(", ")}.
+       Her isim diğerlerinden tamamen farklı olmalı.
+       İsimler arasında aynı ön ek veya son ek kullanma.
        Format: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
   return basePrompt;
@@ -52,14 +54,14 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator. Respond with exactly 8 unique names in JSON format."
+            content: "You are a brand name generator. Generate completely unique names. Never repeat patterns or use similar prefixes/suffixes between names."
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.8,
+        temperature: 1.0,          // Increased for more randomness
         max_tokens: 150,
-        presence_penalty: 0.3,
-        frequency_penalty: 0.3,
+        presence_penalty: 1.5,     // Significantly increased to prevent repetition
+        frequency_penalty: 1.5,    // Significantly increased to prevent repetition
         response_format: { type: "json_object" }
       });
 
@@ -103,7 +105,7 @@ export function registerRoutes(app: Express) {
       res.json(responseData);
     } catch (error) {
       console.error("Error generating names:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Error generating names",
         error: error instanceof Error ? error.message : "Unknown error occurred",
         details: error instanceof Error ? error.stack : undefined

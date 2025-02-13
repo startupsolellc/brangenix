@@ -109,7 +109,7 @@ export default function Results() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {data?.names?.map((name, index) => (
-              <BrandCard key={`${name}-${index}-${Date.now()}`} name={name} />
+              <BrandCard key={`${name}-${Date.now()}-${Math.random()}`} name={name} />
             ))}
           </div>
         </div>
