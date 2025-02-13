@@ -12,17 +12,28 @@ export interface GenerateNamesResponse {
 
 export async function generateNames(data: GenerateNamesRequest): Promise<GenerateNamesResponse> {
   try {
-    // Get guest token from localStorage if it exists
+    // Get guest token and generations from localStorage
     const guestToken = localStorage.getItem('guest_token');
-    const options: RequestInit = {};
+    const guestGenerations = localStorage.getItem('guest_generations');
+    const options: RequestInit = {
+      headers: {}
+    };
 
     if (guestToken) {
       options.headers = {
-        'x-guest-token': guestToken
+        'x-guest-token': guestToken,
+        'x-guest-generations': guestGenerations || '0'
       };
     }
 
     const res = await apiRequest("POST", "/api/generate-names", data, options);
+
+    // Update guest generations from response header if present
+    const newGuestGenerations = res.headers.get('x-guest-generations');
+    if (newGuestGenerations) {
+      localStorage.setItem('guest_generations', newGuestGenerations);
+    }
+
     const jsonData = await res.json();
 
     if (!res.ok) {

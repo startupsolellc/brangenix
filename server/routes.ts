@@ -48,133 +48,134 @@ export function registerRoutes(app: Express) {
   });
 
 app.post("/api/generate-names", async (req, res) => {
-  try {
-    const { keywords, category, language } = generateNamesSchema.parse(req.body);
-
-    // Handle guest users
-    if (!req.user) {
-      const guestToken = req.headers['x-guest-token'];
-      if (!guestToken) {
-        return res.status(401).json({ 
-          message: "Sign in for more features",
-          code: "GUEST_TOKEN_MISSING"
-        });
-      }
-
-      // For guest users, we'll track generations in the headers
-      const guestGenerations = parseInt(req.headers['x-guest-generations'] as string) || 0;
-      if (guestGenerations >= GUEST_LIMIT) {
-        return res.status(403).json({
-          message: "Guest generation limit reached",
-          code: "GUEST_LIMIT_REACHED"
-        });
-      }
-    } else {
-      // For logged-in users, check premium status and credits availability
-      const [user, isPremium] = await Promise.all([
-        storage.getUserById(req.user.id),
-        storage.isPremiumUser(req.user.id)
-      ]);
-
-      if (!isPremium && (!user?.generationCredits || user.generationCredits <= 0)) {
-        return res.status(403).json({
-          message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
-          code: "UPGRADE_REQUIRED"
-        });
-      }
-    }
-
-    console.log("Starting name generation...");
-    console.log("Request params:", { keywords, category, language });
-
-    const prompt = getCategoryPrompt(category, keywords, language);
-    console.log("Generated prompt:", prompt);
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are a brand name generator. Generate unique names and return them in JSON format. Always include the word 'json' in your responses."
-        },
-        { role: "user", content: prompt }
-      ],
-      temperature: 1.0,
-      max_tokens: 150,
-      presence_penalty: 1.5,
-      frequency_penalty: 1.5,
-      response_format: { type: "json_object" }
-    });
-
-    console.log("OpenAI API response received");
-    const content = response.choices[0].message.content;
-    console.log("Raw API response:", content);
-
-    if (!content) {
-      throw new Error("Empty response from OpenAI");
-    }
-
-    let parsedContent;
     try {
-      parsedContent = JSON.parse(content.trim());
-      console.log("Parsed content:", parsedContent);
-    } catch (error) {
-      console.error("Failed to parse OpenAI response:", content);
-      throw new Error("Invalid JSON response from OpenAI");
-    }
+      const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
-    if (!parsedContent.names || !Array.isArray(parsedContent.names)) {
-      console.error("Invalid response structure:", parsedContent);
-      throw new Error("Invalid response format from OpenAI");
-    }
+      // Handle guest users
+      if (!req.user) {
+        const guestToken = req.headers['x-guest-token'];
+        if (!guestToken) {
+          return res.status(401).json({ 
+            message: "Sign in for more features",
+            code: "GUEST_TOKEN_MISSING"
+          });
+        }
 
-    const names = parsedContent.names.slice(0, 8);
-    while (names.length < 8) {
-      names.push(`Brand${names.length + 1}`);
-    }
+        // Get current guest generations from header
+        const guestGenerations = parseInt(req.headers['x-guest-generations'] as string) || 0;
 
-    // Track the generation only after successful name generation
-    if (req.user) {
-      const isPremium = await storage.isPremiumUser(req.user.id);
-      if (!isPremium) {
-        try {
-          await storage.decrementGenerationCredits(req.user.id);
-        } catch (error) {
-          console.error("Failed to decrement credits:", error);
+        // Only block if they've already used all generations
+        if (guestGenerations >= GUEST_LIMIT) {
+          return res.status(403).json({
+            message: "Guest generation limit reached",
+            code: "GUEST_LIMIT_REACHED"
+          });
+        }
+
+        // Increment guest generations in response header
+        res.setHeader('x-guest-generations', (guestGenerations + 1).toString());
+      } else {
+        // For logged-in users, check premium status and credits availability
+        const [user, isPremium] = await Promise.all([
+          storage.getUserById(req.user.id),
+          storage.isPremiumUser(req.user.id)
+        ]);
+
+        if (!isPremium && (!user?.generationCredits || user.generationCredits <= 0)) {
           return res.status(403).json({
             message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
             code: "UPGRADE_REQUIRED"
           });
         }
       }
-      await storage.trackGeneration(req.user.id);
-    } else {
-        //Increment guest generation count.  Requires adding logic to handle header updates.
-        const guestGenerations = parseInt(req.headers['x-guest-generations'] as string) || 0;
-        res.setHeader('x-guest-generations', String(guestGenerations + 1));
+
+      console.log("Starting name generation...");
+      console.log("Request params:", { keywords, category, language });
+
+      const prompt = getCategoryPrompt(category, keywords, language);
+      console.log("Generated prompt:", prompt);
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a brand name generator. Generate unique names and return them in JSON format. Always include the word 'json' in your responses."
+          },
+          { role: "user", content: prompt }
+        ],
+        temperature: 1.0,
+        max_tokens: 150,
+        presence_penalty: 1.5,
+        frequency_penalty: 1.5,
+        response_format: { type: "json_object" }
+      });
+
+      console.log("OpenAI API response received");
+      const content = response.choices[0].message.content;
+      console.log("Raw API response:", content);
+
+      if (!content) {
+        throw new Error("Empty response from OpenAI");
+      }
+
+      let parsedContent;
+      try {
+        parsedContent = JSON.parse(content.trim());
+        console.log("Parsed content:", parsedContent);
+      } catch (error) {
+        console.error("Failed to parse OpenAI response:", content);
+        throw new Error("Invalid JSON response from OpenAI");
+      }
+
+      if (!parsedContent.names || !Array.isArray(parsedContent.names)) {
+        console.error("Invalid response structure:", parsedContent);
+        throw new Error("Invalid response format from OpenAI");
+      }
+
+      const names = parsedContent.names.slice(0, 8);
+      while (names.length < 8) {
+        names.push(`Brand${names.length + 1}`);
+      }
+
+      // Track the generation
+      if (req.user) {
+        const isPremium = await storage.isPremiumUser(req.user.id);
+        if (!isPremium) {
+          try {
+            await storage.decrementGenerationCredits(req.user.id);
+          } catch (error) {
+            console.error("Failed to decrement credits:", error);
+            return res.status(403).json({
+              message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
+              code: "UPGRADE_REQUIRED"
+            });
+          }
+        }
+        await storage.trackGeneration(req.user.id);
+      }
+
+      // Save the generated names
+      await storage.createBrandName({
+        keywords,
+        category,
+        generatedNames: names,
+        language
+      });
+
+      const responseData = { names };
+      console.log("Final response data:", responseData);
+      res.json(responseData);
+
+    } catch (error) {
+      console.error("Error generating names:", error);
+      res.status(500).json({
+        message: "Error generating names",
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+        details: error instanceof Error ? error.stack : undefined
+      });
     }
-
-    // Save the generated names
-    await storage.createBrandName({
-      keywords,
-      category,
-      generatedNames: names,
-      language
-    });
-
-    const responseData = { names };
-    console.log("Final response data:", responseData);
-    res.json(responseData);
-
-  } catch (error) {
-    console.error("Error generating names:", error);
-    res.status(500).json({
-      message: "Error generating names",
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-      details: error instanceof Error ? error.stack : undefined
-    });
-  }
-});
+  });
 
   return createServer(app);
 }
