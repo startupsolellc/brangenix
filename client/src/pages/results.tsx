@@ -52,7 +52,8 @@ export default function Results() {
 
   useEffect(() => {
     // Only show limit dialog if user has actually exceeded the limit
-    if (isOverLimit && !showLimitDialog && guestGenerations >= GUEST_LIMIT) {
+    // and has made at least one generation
+    if (isOverLimit && !showLimitDialog && guestGenerations > 0 && guestGenerations >= GUEST_LIMIT) {
       setShowLimitDialog(true);
     }
   }, [isOverLimit, showLimitDialog, guestGenerations, GUEST_LIMIT]);
