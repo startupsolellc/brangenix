@@ -22,9 +22,9 @@ export function Navigation() {
         <Button
           variant={location === "/" ? "default" : "ghost"}
           size="sm"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
         >
-          <Home className="h-4 w-4" />
+          <Home className="h-4 w-4 text-white" />
           Home
         </Button>
       </Link>
@@ -33,9 +33,9 @@ export function Navigation() {
         <Button
           variant={location === "/dashboard" ? "default" : "ghost"}
           size="sm"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
         >
-          <LayoutDashboard className="h-4 w-4" />
+          <LayoutDashboard className="h-4 w-4 text-white" />
           Dashboard
         </Button>
       </Link>
@@ -44,10 +44,10 @@ export function Navigation() {
 
   const LanguageSelector = () => (
     <Select value={language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[140px]">
+      <SelectTrigger className="w-[140px] rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700 border-none">
         <SelectValue>
           <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
+            <Globe className="h-4 w-4 text-white" />
             {language === "en" ? "English" : "Türkçe"}
           </div>
         </SelectValue>
@@ -88,8 +88,12 @@ export function Navigation() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
+              >
+                <Menu className="h-6 w-6 text-white" />
               </Button>
             </SheetTrigger>
             <SheetContent>
