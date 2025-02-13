@@ -22,11 +22,12 @@ function getCacheKey(keywords: string[], category: string, language: string): st
 
 function cleanOldCache() {
   const now = Date.now();
-  for (const [key, value] of nameGenerationCache.entries()) {
+  const entries = Array.from(nameGenerationCache.entries());
+  entries.forEach(([key, value]) => {
     if (now - value.timestamp > CACHE_DURATION) {
       nameGenerationCache.delete(key);
     }
-  }
+  });
 }
 
 // Category-specific prompts
@@ -36,15 +37,15 @@ const getCategoryPrompt = (category: string, keywords: string[], language: strin
     : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 8 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı.`;
 
   // Add category-specific guidelines
-  const categoryGuidelines = {
+  const categoryPrompts: Record<string, string> = {
     "finance": "Ensure names sound premium, reliable, and trustworthy.",
     "ecommerce": "Create modern, memorable names suitable for online presence.",
     "gaming": "Generate dynamic, engaging names appealing to a young audience.",
-    // Add more categories as needed
   };
 
-  const guideline = categoryGuidelines[category.toLowerCase().split(".")[0]] || "";
-  return `${basePrompt} ${guideline} Only respond with a JSON array containing exactly 8 names, like this: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`;
+  const categoryKey = category.toLowerCase().split(".")[0];
+  const guideline = categoryPrompts[categoryKey] || "";
+  return `${basePrompt} ${guideline} Return exactly 8 names in a JSON array format. Example response format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`;
 };
 
 export function registerRoutes(app: Express) {
@@ -81,28 +82,42 @@ export function registerRoutes(app: Express) {
         messages: [
           { 
             role: "system", 
-            content: "You are a professional brand name generator. Always respond with valid JSON containing exactly 8 names." 
+            content: "You are a professional brand name generator. Return exactly 8 names in a JSON array format." 
           },
           { role: "user", content: prompt }
         ],
         temperature: 0.7,
         top_p: 0.8,
         max_tokens: 150,
-        frequency_penalty: 0.5,
-        response_format: { type: "json_object" }
+        frequency_penalty: 0.5
       });
 
-      const result = JSON.parse(response.choices[0].message.content || "{}");
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("Empty response from OpenAI");
+      }
+
+      let result;
+      try {
+        result = JSON.parse(content);
+      } catch (error) {
+        console.error("Failed to parse OpenAI response:", content);
+        throw new Error("Invalid JSON response from OpenAI");
+      }
 
       if (!result.names || !Array.isArray(result.names) || result.names.length !== 8) {
+        console.error("Invalid response structure:", result);
         throw new Error("Invalid response format from OpenAI");
       }
 
       // Store in cache
       if (nameGenerationCache.size >= MAX_CACHE_SIZE) {
-        // Remove oldest entry
-        const oldestKey = nameGenerationCache.keys().next().value;
-        nameGenerationCache.delete(oldestKey);
+        // Remove oldest entry if cache is full
+        const entries = Array.from(nameGenerationCache.entries());
+        if (entries.length > 0) {
+          const [oldestKey] = entries[0];
+          nameGenerationCache.delete(oldestKey);
+        }
       }
 
       nameGenerationCache.set(cacheKey, {
