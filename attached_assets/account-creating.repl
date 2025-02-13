@@ -1,0 +1,44 @@
+chunk-WERSD76P.js?v=5b563673:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 401 (Unauthorized)
+openai.ts:42 Name generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 401 (Unauthorized)
+openai.ts:42 Name generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+api/generate-names:1 
+        
+        
+       Failed to load resource: the server responded with a status of 401 (Unauthorized)
+openai.ts:42 Name generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+generateNames @ openai.ts:42
+results.tsx:61 Generation error: Error: 401: {"message":"Sign in for more features","code":"GUEST_TOKEN_MISSING"}
+    at throwIfResNotOk (queryClient.ts:6:11)
+    at async apiRequest (queryClient.ts:22:3)
+    at async generateNames (openai.ts:25:17)
+    at async queryFn (results.tsx:38:24)
+(anonymous) @ results.tsx:61
+auth.tsx:33 Form submitted: Object
+auth.tsx:33 Form submitted: Object
+auth.tsx:33 Form submitted: {email: 'mdikyurt@gmail.com', password: 'mdQ33058251'}email: "mdikyurt@gmail.com"password: "mdQ33058251"[[Prototype]]: Object
+auth.tsx:33 Form submitted: {email: 'mdikyurt@gmail.com', password: 'mdQ33058251'}
+auth.tsx:33 Form submitted: {email: 'mdikyurt@gmail.com', password: 'mdQ33058251'}
+auth.tsx:33 Form submitted: {email: 'mdikyurt@gmail.com', password: 'mdQ33058251'}
+auth.tsx:33 Form submitted: {email: 'mdikyurt@gmail.com', password: 'mdQ33058251'}

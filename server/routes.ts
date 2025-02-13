@@ -4,6 +4,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import { storage } from "./storage";
 import { generateNamesSchema } from "@shared/schema";
+import { setupAuth } from "./auth";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
@@ -33,6 +34,9 @@ const GUEST_LIMIT = 5;
 const FREE_USER_LIMIT = 10;
 
 export function registerRoutes(app: Express) {
+  // Set up authentication routes
+  setupAuth(app);
+
   app.get("/api/brand-names", async (_req, res) => {
     try {
       const brandNames = await storage.getBrandNames(20);
@@ -48,8 +52,7 @@ export function registerRoutes(app: Express) {
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
       // Check usage limits
-      const user = req.user as any; // Type this properly based on your auth setup
-      if (!user) {
+      if (!req.user) {
         // Guest user - check localStorage token from headers
         const guestToken = req.headers['x-guest-token'];
         if (!guestToken) {
@@ -58,10 +61,12 @@ export function registerRoutes(app: Express) {
             code: "GUEST_TOKEN_MISSING"
           });
         }
+
+        // Get guest generations from localStorage (handled client-side)
       } else {
         // Logged in user - check database counts
-        const generations = await storage.getUserGenerations(user.id);
-        const isPremium = await storage.isPremiumUser(user.id);
+        const generations = await storage.getUserGenerations(req.user.id);
+        const isPremium = await storage.isPremiumUser(req.user.id);
 
         if (!isPremium && generations >= FREE_USER_LIMIT) {
           return res.status(403).json({
@@ -121,8 +126,8 @@ export function registerRoutes(app: Express) {
       }
 
       // Track the generation
-      if (user) {
-        await storage.trackGeneration(user.id);
+      if (req.user) {
+        await storage.trackGeneration(req.user.id);
       }
 
       const responseData = { names };
@@ -146,6 +151,5 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  return createServer(app);
 }

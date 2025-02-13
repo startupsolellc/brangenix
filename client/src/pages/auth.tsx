@@ -1,13 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "wouter";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useGenerations } from "@/hooks/use-generations";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -19,6 +20,10 @@ type AuthFormData = z.infer<typeof authSchema>;
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const { resetGuestGenerations } = useGenerations();
+
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
@@ -28,11 +33,42 @@ export default function AuthPage() {
   });
 
   const onSubmit = async (data: AuthFormData) => {
+    setIsLoading(true);
     try {
-      // TODO: Implement actual authentication logic
-      console.log("Form submitted:", data);
+      const endpoint = isLogin ? '/api/login' : '/api/register';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Authentication failed');
+      }
+
+      // Reset guest generations when successfully logged in
+      resetGuestGenerations();
+
+      toast({
+        title: isLogin ? "Welcome back!" : "Account created successfully!",
+        description: "You can now generate unlimited brand names.",
+      });
+
+      // Redirect to home page
+      setLocation("/");
     } catch (error) {
       console.error("Auth error:", error);
+      toast({
+        variant: "destructive",
+        title: "Authentication failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,8 +114,8 @@ export default function AuthPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
-                  {isLogin ? "Sign In" : "Create Account"}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
                 </Button>
               </form>
             </Form>
@@ -87,6 +123,7 @@ export default function AuthPage() {
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-sm text-blue-600 hover:underline"
+                disabled={isLoading}
               >
                 {isLogin
                   ? "Don't have an account? Sign up"

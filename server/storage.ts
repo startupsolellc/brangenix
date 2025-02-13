@@ -1,4 +1,4 @@
-import { brandNames, nameGenerations, premiumSubscriptions, users, type BrandName, type InsertBrandName, type NameGeneration, type User, type PremiumSubscription } from "@shared/schema";
+import { brandNames, users, nameGenerations, premiumSubscriptions, type BrandName, type InsertBrandName, type NameGeneration, type User, type PremiumSubscription } from "@shared/schema";
 import { db } from "./db";
 import { desc, eq, and, gt, sql } from "drizzle-orm";
 
@@ -8,6 +8,8 @@ export interface IStorage {
   getUserGenerations(userId: number): Promise<number>;
   trackGeneration(userId?: number): Promise<void>;
   getUserById(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(data: { email: string; hashedPassword: string }): Promise<User>;
   isPremiumUser(userId: number): Promise<boolean>;
 }
 
@@ -86,6 +88,37 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting user:", error);
       throw new Error("Failed to get user");
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error("Error getting user by email:", error);
+      throw new Error("Failed to get user by email");
+    }
+  }
+
+  async createUser(data: { email: string; hashedPassword: string }): Promise<User> {
+    try {
+      const [user] = await db
+        .insert(users)
+        .values(data)
+        .returning();
+
+      if (!user) {
+        throw new Error("Failed to create user - no record returned");
+      }
+
+      return user;
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw new Error("Failed to create user in database");
     }
   }
 
