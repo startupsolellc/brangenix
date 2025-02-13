@@ -12,6 +12,16 @@ if (!process.env.OPENAI_API_KEY) {
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export function registerRoutes(app: Express) {
+  app.get("/api/brand-names", async (_req, res) => {
+    try {
+      const brandNames = await storage.getBrandNames();
+      res.json(brandNames);
+    } catch (error) {
+      console.error("Error fetching brand names:", error);
+      res.status(500).json({ message: "Error fetching brand names" });
+    }
+  });
+
   app.post("/api/generate-names", async (req, res) => {
     try {
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
