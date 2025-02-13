@@ -40,6 +40,25 @@ export function BrandCard({ name }: BrandCardProps) {
     };
   }, []);
 
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setColor(e.target.value);
+    setShowColorPicker(false); // Close the color picker after selection
+  };
+
+  // Close color picker when clicking outside
+  useEffect(() => {
+    if (!showColorPicker) return;
+
+    const handleClickOutside = () => {
+      setShowColorPicker(false);
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showColorPicker]);
+
   return (
     <Card className="w-full transform transition-all duration-200 hover:shadow-lg">
       <CardContent className="p-6 relative">
@@ -50,7 +69,10 @@ export function BrandCard({ name }: BrandCardProps) {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 p-0"
-                onClick={() => setShowColorPicker(!showColorPicker)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent the click from bubbling up
+                  setShowColorPicker(!showColorPicker);
+                }}
               >
                 <Palette className="h-5 w-5" style={{ color }} />
               </Button>
@@ -61,11 +83,14 @@ export function BrandCard({ name }: BrandCardProps) {
           </Tooltip>
 
           {showColorPicker && (
-            <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 z-50">
+            <div 
+              className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 z-50"
+              onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
+            >
               <input
                 type="color"
                 value={color}
-                onChange={(e) => setColor(e.target.value)}
+                onChange={handleColorChange}
                 className="w-8 h-8 cursor-pointer rounded"
               />
             </div>
