@@ -23,8 +23,8 @@ export default function Results() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/generate-names", keywords.join(","), category, language],
     queryFn: () => generateNames({ keywords, category, language }),
-    retry: 3,
-    retryDelay: 1000,
+    retry: 2,
+    retryDelay: 2000,
     gcTime: 0,
     refetchOnWindowFocus: false
   });
@@ -32,10 +32,12 @@ export default function Results() {
   useEffect(() => {
     if (error) {
       console.error("Generation error:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+
       toast({
         variant: "destructive",
         title: translations[language].errors.generation,
-        description: error instanceof Error ? error.message : "Failed to generate names. Please try again."
+        description: errorMessage
       });
     }
   }, [error, language, toast]);
@@ -48,23 +50,21 @@ export default function Results() {
 
     try {
       await queryClient.invalidateQueries({ queryKey: ["/api/generate-names"] });
-      const result = await refetch();
-
-      if (result.error) {
-        throw result.error;
-      }
+      await refetch();
     } catch (error) {
       console.error("Failed to generate new names:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate new names";
+
       toast({
         variant: "destructive",
         title: translations[language].errors.generation,
-        description: error instanceof Error ? error.message : "Failed to generate new names"
+        description: errorMessage
       });
     } finally {
       setTimeout(() => {
         setCooldown(false);
         setIsGenerating(false);
-      }, 5000); // Reduced cooldown time
+      }, 5000);
     }
   };
 
@@ -109,7 +109,10 @@ export default function Results() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {data?.names?.map((name, index) => (
-              <BrandCard key={`${name}-${Date.now()}-${Math.random()}`} name={name} />
+              <BrandCard 
+                key={`${name}-${Date.now()}-${Math.random()}`} 
+                name={name} 
+              />
             ))}
           </div>
         </div>

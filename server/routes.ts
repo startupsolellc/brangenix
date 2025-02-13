@@ -20,11 +20,11 @@ const getCategoryPrompt = (category: string, keywords: string[], language: strin
     ? `Generate 8 unique and diverse brand names using these keywords: ${keywords.join(", ")}.
        Each name must be completely different from others.
        Never use the same prefix or suffix between names.
-       Format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
+       Generate response in valid JSON format with this exact structure: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
     : `Bu anahtar kelimeleri kullanarak 8 tamamen farklı marka ismi üret: ${keywords.join(", ")}.
        Her isim diğerlerinden tamamen farklı olmalı.
        İsimler arasında aynı ön ek veya son ek kullanma.
-       Format: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
+       Yanıtı bu tam JSON formatında ver: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
   return basePrompt;
 };
@@ -54,14 +54,14 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator. Generate completely unique names. Never repeat patterns or use similar prefixes/suffixes between names."
+            content: "You are a brand name generator. Generate unique names and return them in JSON format. Always include the word 'json' in your responses."
           },
           { role: "user", content: prompt }
         ],
-        temperature: 1.0,          // Increased for more randomness
+        temperature: 1.0,          // High temperature for more randomness
         max_tokens: 150,
-        presence_penalty: 1.5,     // Significantly increased to prevent repetition
-        frequency_penalty: 1.5,    // Significantly increased to prevent repetition
+        presence_penalty: 1.5,     // High presence penalty to prevent repetition
+        frequency_penalty: 1.5,    // High frequency penalty to prevent repetition
         response_format: { type: "json_object" }
       });
 
