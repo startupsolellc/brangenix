@@ -50,34 +50,37 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen gradient-bg p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="title text-center">
-          {translations[language].title}
-        </h1>
+    <div className="min-h-screen gradient-bg">
+      {/* Add padding-top to account for fixed navigation */}
+      <div className="pt-24 px-4 md:px-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <h1 className="title text-center">
+            {translations[language].title}
+          </h1>
 
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/")}
-            className="rounded-full hover:shadow-md transition-all duration-200"
-          >
-            {translations[language].createNew}
-          </Button>
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/")}
+              className="rounded-full hover:shadow-md transition-all duration-200"
+            >
+              {translations[language].createNew}
+            </Button>
 
-          <Button
-            onClick={handleGenerateNew}
-            disabled={cooldown}
-            className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
-          >
-            {translations[language].generateNew}
-          </Button>
-        </div>
+            <Button
+              onClick={handleGenerateNew}
+              disabled={cooldown}
+              className="rounded-full bg-blue-600 text-white hover:shadow-md transition-all duration-200 hover:bg-blue-700"
+            >
+              {translations[language].generateNew}
+            </Button>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {data?.names.map((name, index) => (
-            <BrandCard key={index} name={name} />
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {data?.names.map((name, index) => (
+              <BrandCard key={index} name={name} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
