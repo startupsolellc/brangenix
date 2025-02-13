@@ -15,6 +15,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const nameGenerationCache = new Map<string, { names: string[], timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const MAX_CACHE_SIZE = 100;
+const MAX_HISTORY_SIZE = 20; // Maximum number of history records to keep
 
 function getCacheKey(keywords: string[], category: string, language: string): string {
   return `${keywords.sort().join(",")}|${category}|${language}`;
@@ -51,7 +52,8 @@ const getCategoryPrompt = (category: string, keywords: string[], language: strin
 export function registerRoutes(app: Express) {
   app.get("/api/brand-names", async (_req, res) => {
     try {
-      const brandNames = await storage.getBrandNames();
+      // Get only the last 20 brand names
+      const brandNames = await storage.getBrandNames(MAX_HISTORY_SIZE);
       res.json(brandNames);
     } catch (error) {
       console.error("Error fetching brand names:", error);
