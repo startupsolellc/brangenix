@@ -6,24 +6,37 @@ import { BrandCard } from "@/components/results/brand-card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { generateNames } from "@/lib/openai";
 import { translations, type Language } from "@/lib/i18n";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Results() {
   const [, setLocation] = useLocation();
   const [cooldown, setCooldown] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const searchParams = new URLSearchParams(window.location.search);
   const keywords = searchParams.get("keywords")?.split(",") || [];
   const category = searchParams.get("category") || "";
   const language = (searchParams.get("language") || "en") as Language;
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/generate-names", keywords.join(","), category, language],
     queryFn: () => generateNames({ keywords, category, language }),
+    retry: 2,
     gcTime: 0,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false
   });
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: translations[language].errors.generation,
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
+    }
+  }, [error, language, toast]);
 
   const handleGenerateNew = async () => {
     if (cooldown) return;
@@ -31,13 +44,21 @@ export default function Results() {
     setCooldown(true);
     setIsGenerating(true);
 
-    await queryClient.invalidateQueries({ queryKey: ["/api/generate-names"] });
-    await refetch();
-
-    setTimeout(() => {
-      setCooldown(false);
-      setIsGenerating(false);
-    }, 8000);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ["/api/generate-names"] });
+      await refetch();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: translations[language].errors.generation,
+        description: error instanceof Error ? error.message : "Failed to generate new names"
+      });
+    } finally {
+      setTimeout(() => {
+        setCooldown(false);
+        setIsGenerating(false);
+      }, 8000);
+    }
   };
 
   if (isLoading || isGenerating) {

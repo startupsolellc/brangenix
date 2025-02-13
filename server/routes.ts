@@ -17,10 +17,12 @@ const openai = new OpenAI({
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate 8 short and unique brand names using these keywords: ${keywords.join(", ")}. 
-       Return only a JSON object with 'names' array.`
-    : `Bu anahtar kelimeleri kullanarak 8 kısa ve benzersiz marka ismi üret: ${keywords.join(", ")}. 
-       Sadece 'names' dizisi içeren bir JSON nesnesi döndür.`;
+    ? `Generate exactly 8 unique brand names using these keywords: ${keywords.join(", ")}.
+       Make them short and memorable.
+       Return response in this format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`
+    : `Bu anahtar kelimeleri kullanarak tam 8 benzersiz marka ismi üret: ${keywords.join(", ")}.
+       İsimler kısa ve akılda kalıcı olmalı.
+       Yanıtı bu formatta döndür: {"names": ["isim1", "isim2", "isim3", "isim4", "isim5", "isim6", "isim7", "isim8"]}`;
 
   return basePrompt;
 };
@@ -50,12 +52,13 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator."
+            content: "You are a brand name generator. Always respond with valid JSON containing exactly 8 names in an array."
           },
           { role: "user", content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 150,
+        max_tokens: 256,
+        presence_penalty: 0.5,
         frequency_penalty: 0.5
       });
 
@@ -65,21 +68,23 @@ export function registerRoutes(app: Express) {
         throw new Error("Empty response from OpenAI");
       }
 
-      console.log("OpenAI response content:", content);
-
-      let result;
+      let parsedContent;
       try {
-        result = JSON.parse(content);
-        console.log("Parsed result:", result);
+        parsedContent = JSON.parse(content.trim());
       } catch (error) {
         console.error("Failed to parse OpenAI response:", content);
         throw new Error("Invalid JSON response from OpenAI");
       }
 
-      const names = Array.isArray(result) ? result : result.names;
-      if (!Array.isArray(names)) {
-        console.error("Invalid response structure:", result);
+      if (!parsedContent.names || !Array.isArray(parsedContent.names)) {
+        console.error("Invalid response structure:", parsedContent);
         throw new Error("Invalid response format from OpenAI");
+      }
+
+      // Ensure exactly 8 names
+      const names = parsedContent.names.slice(0, 8);
+      while (names.length < 8) {
+        names.push(`Brand${names.length + 1}`);
       }
 
       const responseData = { names };
@@ -88,14 +93,17 @@ export function registerRoutes(app: Express) {
       await storage.createBrandName({
         keywords,
         category,
-        generatedNames: responseData.names,
+        generatedNames: names,
         language
       });
 
       res.json(responseData);
     } catch (error) {
       console.error("Error generating names:", error);
-      res.status(500).json({ message: "Error generating names" });
+      res.status(500).json({ 
+        message: "Error generating names",
+        error: error.message 
+      });
     }
   });
 

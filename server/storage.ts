@@ -9,23 +9,38 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async createBrandName(insertBrandName: InsertBrandName): Promise<BrandName> {
-    const [brandName] = await db
-      .insert(brandNames)
-      .values(insertBrandName)
-      .returning();
-    return brandName;
+    try {
+      const [brandName] = await db
+        .insert(brandNames)
+        .values({
+          keywords: insertBrandName.keywords,
+          category: insertBrandName.category,
+          generatedNames: insertBrandName.generatedNames,
+          language: insertBrandName.language
+        })
+        .returning();
+      return brandName;
+    } catch (error) {
+      console.error("Error creating brand name:", error);
+      throw new Error("Failed to create brand name in database");
+    }
   }
 
   async getBrandNames(limit?: number): Promise<BrandName[]> {
-    const query = db.select()
-      .from(brandNames)
-      .orderBy(desc(brandNames.id));
+    try {
+      const query = db.select()
+        .from(brandNames)
+        .orderBy(desc(brandNames.id));
 
-    if (limit) {
-      query.limit(limit);
+      if (limit) {
+        query.limit(limit);
+      }
+
+      return await query;
+    } catch (error) {
+      console.error("Error getting brand names:", error);
+      throw new Error("Failed to get brand names from database");
     }
-
-    return await query;
   }
 }
 
