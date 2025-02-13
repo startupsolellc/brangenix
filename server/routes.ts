@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { storage } from "./storage";
 import { generateNamesSchema } from "@shared/schema";
 import { setupAuth } from "./auth";
+import { WebSocketServer } from 'ws';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required");
@@ -121,7 +122,7 @@ export async function registerRoutes(app: Express) {
       if (!req.user) {
         const guestToken = req.headers['x-guest-token'];
         if (!guestToken) {
-          return res.status(401).json({ 
+          return res.status(401).json({
             message: "Sign in for more features",
             code: "GUEST_TOKEN_MISSING"
           });
@@ -238,6 +239,25 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  const httpServer = createServer(app);
 
-  return createServer(app);
+  // Set up WebSocket server on a separate path to avoid conflicts with Vite
+  const wss = new WebSocketServer({
+    server: httpServer,
+    path: '/ws'
+  });
+
+  wss.on('connection', (ws) => {
+    console.log('WebSocket client connected');
+
+    ws.on('message', (message) => {
+      console.log('received: %s', message);
+    });
+
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+    });
+  });
+
+  return httpServer;
 }
