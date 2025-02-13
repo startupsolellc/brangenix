@@ -36,7 +36,7 @@ export function BrandCard({ name }: BrandCardProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Load fonts
+    // Her kart için rastgele font seç
     const randomFont = FONTS[Math.floor(Math.random() * FONTS.length)];
     const link = document.createElement('link');
     link.href = `https://fonts.googleapis.com/css2?family=${randomFont.replace(' ', '+')}&display=swap`;
@@ -48,7 +48,7 @@ export function BrandCard({ name }: BrandCardProps) {
     return () => {
       document.head.removeChild(link);
     };
-  }, []);
+  }, [name]); // name prop'u değiştiğinde font'u yeniden seç
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
