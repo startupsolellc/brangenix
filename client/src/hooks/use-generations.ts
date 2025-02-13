@@ -11,28 +11,29 @@ export function useGenerations() {
   const [guestGenerations, setGuestGenerations] = useLocalStorage<number>(GUEST_GENERATIONS_KEY, 0);
   const [isOverLimit, setIsOverLimit] = useState(false);
 
+  // Initialize new guest users
   useEffect(() => {
-    // Initialize guest token if not exists
     if (!guestToken) {
+      // Generate new guest token for first-time visitors
       setGuestToken(uuidv4());
-      // Initialize generations to 0 for new guests
+      // Explicitly set initial generations to 0
       setGuestGenerations(0);
+      setIsOverLimit(false);
     }
   }, [guestToken, setGuestToken, setGuestGenerations]);
 
+  // Handle limit checking
   useEffect(() => {
-    // Only check limit for guest users with a token
-    // and when they have actually made some generations
-    if (guestToken && guestGenerations > 0) {
-      setIsOverLimit(guestGenerations >= GUEST_LIMIT);
-    } else {
-      setIsOverLimit(false);
+    if (guestToken) {
+      const currentGenerations = Number(guestGenerations);
+      // Only set over limit if they've actually used generations
+      setIsOverLimit(currentGenerations > 0 && currentGenerations >= GUEST_LIMIT);
     }
   }, [guestGenerations, guestToken]);
 
   const trackGeneration = () => {
     if (guestToken) {
-      const currentGenerations = Number(guestGenerations) || 0;
+      const currentGenerations = Number(guestGenerations);
       // Only increment if under limit
       if (currentGenerations < GUEST_LIMIT) {
         setGuestGenerations(currentGenerations + 1);
@@ -47,7 +48,7 @@ export function useGenerations() {
 
   return {
     guestToken,
-    guestGenerations: Number(guestGenerations) || 0,
+    guestGenerations: Number(guestGenerations),
     isOverLimit,
     trackGeneration,
     resetGuestGenerations,
