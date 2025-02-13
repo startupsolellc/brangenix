@@ -21,7 +21,7 @@ export function registerRoutes(app: Express) {
         : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 4 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı. JSON formatında yanıt ver: { "names": string[] }`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+        model: "gpt-4",
         messages: [
           { role: "system", content: "You are a professional brand name generator." },
           { role: "user", content: prompt }
