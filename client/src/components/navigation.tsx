@@ -73,9 +73,9 @@ export function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/">
-          <a className="text-xl font-semibold">
+          <span className="text-xl font-semibold">
             Brand Name Generator
-          </a>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
