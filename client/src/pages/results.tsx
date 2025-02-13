@@ -151,38 +151,40 @@ export default function Results() {
       </div>
 
       <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {guestToken ? "Free Generations Limit Reached" : "Generation Credits Used"}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              {guestToken ? (
-                <>
-                  <p>You have used all {GUEST_LIMIT} free generations available to guest users.</p>
-                  <p>Sign in to get more free credits or upgrade to premium for unlimited generations!</p>
-                </>
-              ) : (
-                <>
-                  <p>You have used all your available generation credits.</p>
-                  <p>Upgrade to premium to unlock unlimited brand name generations and more premium features!</p>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => {
-                setShowLimitDialog(false);
-                setLocation(guestToken ? "/auth" : "/coming-soon");
-              }}
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              {guestToken ? "Sign In" : "Upgrade to Premium"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {guestToken ? "Free Generations Limit Reached" : "Generation Credits Used"}
+                </AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-2">
+                    {guestToken ? (
+                      <>
+                        <div>You have used all {GUEST_LIMIT} free generations available to guest users.</div>
+                        <div>Sign in to get more free credits or upgrade to premium for unlimited generations!</div>
+                      </>
+                    ) : (
+                      <>
+                        <div>You have used all your available generation credits.</div>
+                        <div>Upgrade to premium to unlock unlimited brand name generations and more premium features!</div>
+                      </>
+                    )}
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={() => {
+                    setShowLimitDialog(false);
+                    setLocation(guestToken ? "/auth" : "/coming-soon");
+                  }}
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  {guestToken ? "Sign In" : "Upgrade to Premium"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
     </div>
   );
 }
