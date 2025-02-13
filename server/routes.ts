@@ -38,9 +38,6 @@ const getCategoryPrompt = (category: string, keywords: string[], language: strin
   return basePrompt;
 };
 
-const GUEST_LIMIT = 5;
-const FREE_USER_LIMIT = 10;
-
 export function registerRoutes(app: Express) {
   // Set up authentication routes
   setupAuth(app);
@@ -56,6 +53,56 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const users = await storage.getAllUsers(page, limit);
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Error fetching users" });
+    }
+  });
+
+  app.post("/api/admin/users/:id", isAdmin, async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      const updates = req.body;
+      const user = await storage.updateUserStatus(userId, updates);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Error updating user" });
+    }
+  });
+
+  app.get("/api/admin/settings", isAdmin, async (req, res) => {
+    try {
+      const settings = await Promise.all([
+        storage.getSystemSetting("guest_limit"),
+        storage.getSystemSetting("free_user_limit"),
+        storage.getSystemSetting("generation_cooldown")
+      ]);
+      res.json(settings.filter(Boolean));
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      res.status(500).json({ message: "Error fetching settings" });
+    }
+  });
+
+  app.post("/api/admin/settings", isAdmin, async (req, res) => {
+    try {
+      const { key, value } = req.body;
+      const setting = await storage.updateSystemSetting(key, value, req.user!.id);
+      res.json(setting);
+    } catch (error) {
+      console.error("Error updating setting:", error);
+      res.status(500).json({ message: "Error updating setting" });
+    }
+  });
+
+  // Existing routes...
   app.get("/api/brand-names", async (_req, res) => {
     try {
       const brandNames = await storage.getBrandNames(20);

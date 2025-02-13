@@ -10,6 +10,9 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth";
 import ComingSoonPage from "@/pages/coming-soon";
 import AdminDashboard from "@/pages/admin/dashboard";
+import AdminUsers from "@/pages/admin/users";
+import AdminActivity from "@/pages/admin/activity";
+import AdminSettings from "@/pages/admin/settings";
 import { Navigation } from "@/components/navigation";
 
 function Router() {
@@ -21,6 +24,9 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/coming-soon" component={ComingSoonPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/activity" component={AdminActivity} />
+      <Route path="/admin/settings" component={AdminSettings} />
       <Route component={NotFound} />
     </Switch>
   );
