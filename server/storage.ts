@@ -1,6 +1,6 @@
-import { brandNames, users, nameGenerations, premiumSubscriptions, type BrandName, type InsertBrandName, type NameGeneration, type User, type PremiumSubscription } from "@shared/schema";
+import { brandNames, users, nameGenerations, premiumSubscriptions, systemSettings, userActivity, type BrandName, type InsertBrandName, type NameGeneration, type User, type PremiumSubscription, type SystemSetting, type InsertSystemSetting, type UserActivity } from "@shared/schema";
 import { db } from "./db";
-import { desc, eq, and, gt, sql } from "drizzle-orm";
+import { desc, eq, and, gt, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   createBrandName(brandName: InsertBrandName): Promise<BrandName>;
@@ -12,6 +12,16 @@ export interface IStorage {
   createUser(data: { email: string; hashedPassword: string }): Promise<User>;
   isPremiumUser(userId: number): Promise<boolean>;
   decrementGenerationCredits(userId: number): Promise<void>;
+  // Admin methods
+  getAllUsers(page: number, limit: number): Promise<{ users: User[], total: number }>;
+  updateUserStatus(userId: number, updates: Partial<User>): Promise<User>;
+  getSystemSetting(key: string): Promise<SystemSetting | undefined>;
+  updateSystemSetting(key: string, value: any, updatedBy: number): Promise<SystemSetting>;
+  getUserStatistics(): Promise<{
+    totalUsers: number;
+    totalGenerations: number;
+    activeUsers: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -185,6 +195,114 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error decrementing generation credits:", error);
       throw error instanceof Error ? error : new Error("Failed to decrement generation credits");
+    }
+  }
+
+  // Admin methods implementation
+  async getAllUsers(page: number = 1, limit: number = 10): Promise<{ users: User[], total: number }> {
+    try {
+      const offset = (page - 1) * limit;
+
+      const [usersResult, countResult] = await Promise.all([
+        db.select().from(users)
+          .orderBy(desc(users.createdAt))
+          .limit(limit)
+          .offset(offset),
+        db.select({ count: sql<number>`count(*)` }).from(users)
+      ]);
+
+      return {
+        users: usersResult,
+        total: countResult[0].count
+      };
+    } catch (error) {
+      console.error("Error getting users:", error);
+      throw new Error("Failed to get users from database");
+    }
+  }
+
+  async updateUserStatus(userId: number, updates: Partial<User>): Promise<User> {
+    try {
+      const [updatedUser] = await db
+        .update(users)
+        .set(updates)
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error("User not found");
+      }
+
+      return updatedUser;
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      throw new Error("Failed to update user status");
+    }
+  }
+
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> {
+    try {
+      const [setting] = await db
+        .select()
+        .from(systemSettings)
+        .where(eq(systemSettings.key, key));
+      return setting;
+    } catch (error) {
+      console.error("Error getting system setting:", error);
+      throw new Error("Failed to get system setting");
+    }
+  }
+
+  async updateSystemSetting(
+    key: string,
+    value: any,
+    updatedBy: number
+  ): Promise<SystemSetting> {
+    try {
+      const [setting] = await db
+        .insert(systemSettings)
+        .values({ key, value, updatedBy })
+        .onConflictDoUpdate({
+          target: systemSettings.key,
+          set: { value, updatedBy, updatedAt: new Date() }
+        })
+        .returning();
+
+      if (!setting) {
+        throw new Error("Failed to update system setting");
+      }
+
+      return setting;
+    } catch (error) {
+      console.error("Error updating system setting:", error);
+      throw new Error("Failed to update system setting");
+    }
+  }
+
+  async getUserStatistics(): Promise<{
+    totalUsers: number;
+    totalGenerations: number;
+    activeUsers: number;
+  }> {
+    try {
+      const [userCount, generationCount, activeUserCount] = await Promise.all([
+        db.select({ count: sql<number>`count(*)` }).from(users),
+        db.select({ count: sql<number>`sum(${nameGenerations.count})` }).from(nameGenerations),
+        db.select({ count: sql<number>`count(distinct ${nameGenerations.userId})` })
+          .from(nameGenerations)
+          .where(
+            gt(nameGenerations.createdAt, sql`NOW() - INTERVAL '30 days'`)
+          )
+      ]);
+
+      return {
+        totalUsers: userCount[0].count,
+        totalGenerations: generationCount[0].count || 0,
+        activeUsers: activeUserCount[0].count
+      };
+    } catch (error) {
+      console.error("Error getting user statistics:", error);
+      throw new Error("Failed to get user statistics");
     }
   }
 }

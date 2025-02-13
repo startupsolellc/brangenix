@@ -9,6 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth";
 import ComingSoonPage from "@/pages/coming-soon";
+import AdminDashboard from "@/pages/admin/dashboard";
 import { Navigation } from "@/components/navigation";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/coming-soon" component={ComingSoonPage} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

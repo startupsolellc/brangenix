@@ -16,6 +16,14 @@ const openai = new OpenAI({
   maxRetries: 3
 });
 
+// Middleware to check if user is admin
+const isAdmin = async (req: any, res: any, next: any) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
+};
+
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
     ? `Generate 8 unique and diverse brand names using these keywords: ${keywords.join(", ")}.
@@ -37,6 +45,17 @@ export function registerRoutes(app: Express) {
   // Set up authentication routes
   setupAuth(app);
 
+  // Add admin routes
+  app.get("/api/admin/statistics", isAdmin, async (_req, res) => {
+    try {
+      const stats = await storage.getUserStatistics();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin statistics:", error);
+      res.status(500).json({ message: "Error fetching statistics" });
+    }
+  });
+
   app.get("/api/brand-names", async (_req, res) => {
     try {
       const brandNames = await storage.getBrandNames(20);
@@ -47,7 +66,7 @@ export function registerRoutes(app: Express) {
     }
   });
 
-app.post("/api/generate-names", async (req, res) => {
+  app.post("/api/generate-names", async (req, res) => {
     try {
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
 

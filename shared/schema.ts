@@ -22,17 +22,17 @@ export const brandNames = pgTable("brand_names", {
 export const nameGenerations = pgTable("name_generations", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
-  category: text("category"), // Made nullable initially
-  keywords: text("keywords").array(), // Made nullable initially
+  category: text("category"), 
+  keywords: text("keywords").array(), 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   count: integer("count").default(1).notNull(),
-  language: text("language"), // Made nullable initially
+  language: text("language"), 
 });
 
 export const userActivity = pgTable("user_activity", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  action: text("action").notNull(), // e.g., 'generate_names', 'login', etc.
+  action: text("action").notNull(), 
   metadata: jsonb("metadata").$type<Record<string, any>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -57,7 +57,14 @@ export const premiumSubscriptions = pgTable("premium_subscriptions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Schemas for inserting data
+export const systemSettings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").unique().notNull(),
+  value: jsonb("value").$type<string | number | boolean>().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   hashedPassword: true,
@@ -102,7 +109,12 @@ export const insertSubscriptionSchema = createInsertSchema(premiumSubscriptions)
   expiresAt: true,
 });
 
-// Types
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).pick({
+  key: true,
+  value: true,
+  updatedBy: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type BrandName = typeof brandNames.$inferSelect;
@@ -110,6 +122,8 @@ export type NameGeneration = typeof nameGenerations.$inferSelect;
 export type UserActivity = typeof userActivity.$inferSelect;
 export type EmailConfig = typeof emailConfig.$inferSelect;
 export type PremiumSubscription = typeof premiumSubscriptions.$inferSelect;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 
 export const generateNamesSchema = z.object({
   keywords: z.array(z.string()).min(3).max(5),
