@@ -9,9 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 export default function Home() {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [category, setCategory] = useState("");
-  const [language, setLanguage] = useState<Language>("en");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Get language from localStorage or default to "en"
+  const language = (localStorage.getItem("preferred-language") as Language) || "en";
 
   const handleAddKeyword = (keyword: string) => {
     if (keywords.length < 5) {
@@ -71,16 +73,7 @@ export default function Home() {
             language={language}
           />
 
-          <div className="flex justify-between items-center">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className="border rounded px-2 py-1"
-            >
-              <option value="en">English</option>
-              <option value="tr">Türkçe</option>
-            </select>
-
+          <div className="flex justify-end">
             <Button onClick={handleSubmit}>
               {translations[language].generate}
             </Button>
