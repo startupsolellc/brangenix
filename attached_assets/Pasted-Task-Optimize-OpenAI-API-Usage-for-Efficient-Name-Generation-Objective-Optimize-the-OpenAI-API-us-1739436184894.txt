@@ -1,0 +1,228 @@
+Task: Optimize OpenAI API Usage for Efficient Name Generation
+
+Objective
+
+Optimize the OpenAI API usage for generating business names while ensuring cost efficiency, quality, and diversity. Improve the category selection UI/UX and implement a hybrid system that supports both manual selection and AI-driven recommendations.
+
+1. Category System Implementation
+
+1.1. Category Selection UI/UX Improvements
+
+Replace dropdown selection with a structured category list (text-based, no icons/emojis).
+
+Prioritize "E-Commerce & Online Business" as the first category since it is the most frequently selected.
+
+Allow users to manually select a category from a grid-based layout.
+
+Add a search box where users can type keywords to receive automatic category suggestions.
+
+If a user selects a category, display its related subcategories automatically.
+
+Users can override AI recommendations and manually choose a category and subcategory.
+
+1.2. Category & Subcategory List
+
+Primary Categories & Their Subcategories
+
+1️⃣ E-Commerce & Online Business (Top priority category)
+
+Dropshipping
+
+Amazon FBA & Marketplace
+
+Digital Product Stores
+
+E-Commerce Brands & Shopify Stores
+
+2️⃣ Finance & Crypto
+
+Fintech & Digital Banking
+
+Crypto & Blockchain Projects
+
+Investment & Stock Market Platforms
+
+Payment Systems & Digital Wallets
+
+3️⃣ Fitness & Health
+
+Fitness & Gym Brands
+
+Sportswear & Equipment
+
+Health Supplements & Nutrition
+
+Online Coaching & Training
+
+4️⃣ Education & E-Learning
+
+Online Course Platforms
+
+Academic Institutions
+
+Coding & Technical Training
+
+Career & Personal Development
+
+5️⃣ Gaming & Entertainment
+
+Indie Game Studios
+
+Esports Teams & Communities
+
+Content Creators (YouTube, Twitch, Podcasts)
+
+Music & Streaming Platforms
+
+6️⃣ Green Energy & Sustainability
+
+Renewable Energy Companies
+
+Eco-Friendly Brands
+
+Electric Vehicles & Smart Mobility
+
+Sustainable Tourism & Green Living
+
+7️⃣ AI & Web3
+
+AI Startups & SaaS Tools
+
+Web3 & DeFi Platforms
+
+Smart Contracts & DAO Projects
+
+Big Data & Analytics
+
+8️⃣ Real Estate & Construction
+
+Real Estate Consulting
+
+Architecture & Construction Firms
+
+Commercial Real Estate
+
+Smart Cities & Urban Development
+
+9️⃣ Fashion & Apparel
+
+Luxury Fashion Brands
+
+Casual Wear & Everyday Clothing
+
+Sportswear & Sneakers
+
+Accessories & Jewelry
+
+10️⃣ Food & Beverage
+
+Fast Food & Restaurant Chains
+
+Coffee & Tea Brands
+
+Healthy Snacks & Organic Products
+
+Alcohol & Beverage Companies
+
+11️⃣ Media & Digital Agencies
+
+Film & TV Production
+
+Podcasting & Audio Content
+
+Photography & Visual Arts
+
+Digital Media & Publishing
+
+12️⃣ Startup & Personal Branding
+
+Freelancer & Consulting Brands
+
+Entrepreneurship & Startup Projects
+
+Personal Branding & Influencers
+
+Remote Work & Digital Nomads
+
+2. OpenAI API Optimization
+
+2.1. Efficient API Usage
+
+Reduce redundant API calls by caching previous requests.
+
+If a user enters the same keywords as a recent request, return cached results instead of making a new API call.
+
+Store the last 100 API responses and reuse them for identical queries.
+
+Introduce an expiration mechanism for cached results (e.g., refresh every 24 hours).
+
+2.2. Optimized Prompt Engineering
+
+Ensure results are unique, diverse, and avoid repetition.
+
+Modify the prompt structure based on the selected category.
+
+Example General Prompt:
+
+Generate 10 unique and brandable business names based on the following keywords: {keywords}.
+The names should be fresh, non-repetitive, and aligned with the {category} industry.
+Avoid generic or overused business name structures.
+
+Category-Specific Prompts:
+
+✅ Finance & Crypto:
+
+Generate 10 professional and reliable brand names based on {keywords}.
+Ensure the names sound premium and align with the finance industry.
+
+✅ E-Commerce & Online Business:
+
+Generate 10 catchy and memorable e-commerce business names based on {keywords}.
+Make sure the names are modern and appealing.
+
+✅ Gaming & Entertainment:
+
+Generate 10 engaging and dynamic brand names based on {keywords}.
+The names should feel fun and appealing to a young audience.
+
+2.3. API Parameters for Cost & Quality Balance
+
+Temperature: 0.7 (Balanced randomness and creativity)
+
+Top_p: 0.8 (Increase diversity in responses)
+
+Max Tokens: 30 (Prevent overly long responses)
+
+Frequency Penalty: 0.5 (Reduce repeated names)
+
+Example API Request:
+
+{
+  "model": "gpt-4o-mini",
+  "temperature": 0.7,
+  "top_p": 0.8,
+  "max_tokens": 30,
+  "frequency_penalty": 0.5,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a brand name generator."
+    },
+    {
+      "role": "user",
+      "content": "Generate 10 unique and brandable names for a {category} business using these keywords: {keywords}. Avoid repetitive or generic names."
+    }
+  ]
+}
+
+3. Final Outcome
+
+✅ Dropdown selection replaced with a grid-based category selection system.
+✅ Users can either manually select a category or use AI-powered keyword suggestions.
+✅ "E-Commerce & Online Business" is prioritized in the category list.
+✅ Category-specific prompts improve result quality.
+✅ API call optimizations reduce costs and increase efficiency.
+✅ Caching system prevents redundant OpenAI requests.
+
+This implementation ensures a smooth, fast, and efficient user experience while maintaining high-quality, unique brand name generation. 🚀
+
