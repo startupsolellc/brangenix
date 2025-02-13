@@ -11,7 +11,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 30000, // 30 second timeout
+  timeout: 30000,
   maxRetries: 3
 });
 
@@ -29,6 +29,9 @@ const getCategoryPrompt = (category: string, keywords: string[], language: strin
   return basePrompt;
 };
 
+const GUEST_LIMIT = 5;
+const FREE_USER_LIMIT = 10;
+
 export function registerRoutes(app: Express) {
   app.get("/api/brand-names", async (_req, res) => {
     try {
@@ -42,8 +45,33 @@ export function registerRoutes(app: Express) {
 
   app.post("/api/generate-names", async (req, res) => {
     try {
-      console.log("Starting name generation...");
       const { keywords, category, language } = generateNamesSchema.parse(req.body);
+
+      // Check usage limits
+      const user = req.user as any; // Type this properly based on your auth setup
+      if (!user) {
+        // Guest user - check localStorage token from headers
+        const guestToken = req.headers['x-guest-token'];
+        if (!guestToken) {
+          return res.status(401).json({ 
+            message: "Sign in for more features",
+            code: "GUEST_TOKEN_MISSING"
+          });
+        }
+      } else {
+        // Logged in user - check database counts
+        const generations = await storage.getUserGenerations(user.id);
+        const isPremium = await storage.isPremiumUser(user.id);
+
+        if (!isPremium && generations >= FREE_USER_LIMIT) {
+          return res.status(403).json({
+            message: "Upgrade to premium for unlimited generations",
+            code: "UPGRADE_REQUIRED"
+          });
+        }
+      }
+
+      console.log("Starting name generation...");
       console.log("Request params:", { keywords, category, language });
 
       const prompt = getCategoryPrompt(category, keywords, language);
@@ -58,10 +86,10 @@ export function registerRoutes(app: Express) {
           },
           { role: "user", content: prompt }
         ],
-        temperature: 1.0,          // High temperature for more randomness
+        temperature: 1.0,
         max_tokens: 150,
-        presence_penalty: 1.5,     // High presence penalty to prevent repetition
-        frequency_penalty: 1.5,    // High frequency penalty to prevent repetition
+        presence_penalty: 1.5,
+        frequency_penalty: 1.5,
         response_format: { type: "json_object" }
       });
 
@@ -90,6 +118,11 @@ export function registerRoutes(app: Express) {
       const names = parsedContent.names.slice(0, 8);
       while (names.length < 8) {
         names.push(`Brand${names.length + 1}`);
+      }
+
+      // Track the generation
+      if (user) {
+        await storage.trackGeneration(user.id);
       }
 
       const responseData = { names };

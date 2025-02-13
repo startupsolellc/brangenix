@@ -12,11 +12,24 @@ export interface GenerateNamesResponse {
 
 export async function generateNames(data: GenerateNamesRequest): Promise<GenerateNamesResponse> {
   try {
-    const res = await apiRequest("POST", "/api/generate-names", data);
+    // Get guest token from localStorage if it exists
+    const guestToken = localStorage.getItem('guest_token');
+    const options: RequestInit = {};
+
+    if (guestToken) {
+      options.headers = {
+        'x-guest-token': guestToken
+      };
+    }
+
+    const res = await apiRequest("POST", "/api/generate-names", data, options);
     const jsonData = await res.json();
 
     if (!res.ok) {
-      // If the server returned an error response
+      // Handle specific error codes
+      if (jsonData.code === 'GUEST_TOKEN_MISSING' || jsonData.code === 'UPGRADE_REQUIRED') {
+        throw new Error(jsonData.code);
+      }
       throw new Error(jsonData.error || "Failed to generate names");
     }
 

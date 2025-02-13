@@ -1,24 +1,22 @@
-import { brandNames, type BrandName, type InsertBrandName } from "@shared/schema";
+import { brandNames, nameGenerations, premiumSubscriptions, users, type BrandName, type InsertBrandName, type NameGeneration, type User, type PremiumSubscription } from "@shared/schema";
 import { db } from "./db";
-import { desc } from "drizzle-orm";
+import { desc, eq, and, gt, sql } from "drizzle-orm";
 
 export interface IStorage {
   createBrandName(brandName: InsertBrandName): Promise<BrandName>;
   getBrandNames(limit?: number): Promise<BrandName[]>;
+  getUserGenerations(userId: number): Promise<number>;
+  trackGeneration(userId?: number): Promise<void>;
+  getUserById(id: number): Promise<User | undefined>;
+  isPremiumUser(userId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
   async createBrandName(insertBrandName: InsertBrandName): Promise<BrandName> {
     try {
-      // Create a new brand name record
       const [brandName] = await db
         .insert(brandNames)
-        .values([{
-          keywords: insertBrandName.keywords,
-          category: insertBrandName.category,
-          generatedNames: insertBrandName.generatedNames,
-          language: insertBrandName.language
-        }])
+        .values(insertBrandName)
         .returning();
 
       if (!brandName) {
@@ -34,20 +32,79 @@ export class DatabaseStorage implements IStorage {
 
   async getBrandNames(limit?: number): Promise<BrandName[]> {
     try {
-      let query = db
+      const query = db
         .select()
         .from(brandNames)
         .orderBy(desc(brandNames.id));
 
       if (limit) {
-        query = query.limit(limit);
+        return await query.limit(limit);
       }
 
-      const results = await query;
-      return results;
+      return await query;
     } catch (error) {
       console.error("Error getting brand names:", error);
       throw new Error("Failed to get brand names from database");
+    }
+  }
+
+  async getUserGenerations(userId: number): Promise<number> {
+    try {
+      const result = await db
+        .select({
+          count: sql<number>`sum(${nameGenerations.count})`
+        })
+        .from(nameGenerations)
+        .where(eq(nameGenerations.userId, userId));
+
+      return result[0]?.count || 0;
+    } catch (error) {
+      console.error("Error getting user generations:", error);
+      throw new Error("Failed to get user generations");
+    }
+  }
+
+  async trackGeneration(userId?: number): Promise<void> {
+    try {
+      await db.insert(nameGenerations).values({
+        userId: userId,
+        count: 1,
+      });
+    } catch (error) {
+      console.error("Error tracking generation:", error);
+      throw new Error("Failed to track generation");
+    }
+  }
+
+  async getUserById(id: number): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error("Error getting user:", error);
+      throw new Error("Failed to get user");
+    }
+  }
+
+  async isPremiumUser(userId: number): Promise<boolean> {
+    try {
+      const [subscription] = await db
+        .select()
+        .from(premiumSubscriptions)
+        .where(
+          and(
+            eq(premiumSubscriptions.userId, userId),
+            eq(premiumSubscriptions.isActive, true),
+            gt(premiumSubscriptions.expiresAt, new Date())
+          )
+        );
+      return !!subscription;
+    } catch (error) {
+      console.error("Error checking premium status:", error);
+      throw new Error("Failed to check premium status");
     }
   }
 }
