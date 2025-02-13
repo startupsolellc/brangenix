@@ -51,9 +51,8 @@ app.post("/api/generate-names", async (req, res) => {
   try {
     const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
-    // Check basic auth requirements first
+    // Handle guest users
     if (!req.user) {
-      // Guest user - check localStorage token from headers
       const guestToken = req.headers['x-guest-token'];
       if (!guestToken) {
         return res.status(401).json({ 
@@ -125,7 +124,7 @@ app.post("/api/generate-names", async (req, res) => {
       names.push(`Brand${names.length + 1}`);
     }
 
-    // Now that we have successfully generated names, handle credit deduction
+    // Now that we have successfully generated names, handle credit deduction for logged-in users
     if (req.user) {
       const isPremium = await storage.isPremiumUser(req.user.id);
       if (!isPremium) {
