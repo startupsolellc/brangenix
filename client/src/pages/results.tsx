@@ -19,10 +19,9 @@ export default function Results() {
   const language = (searchParams.get("language") || "en") as Language;
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["/api/generate-names", keywords.join(","), category, language, Date.now()],
+    queryKey: ["/api/generate-names", keywords.join(","), category, language],
     queryFn: () => generateNames({ keywords, category, language }),
-    cacheTime: 0,
-    staleTime: 0,
+    gcTime: 0,
     refetchOnWindowFocus: false,
   });
 
@@ -32,10 +31,7 @@ export default function Results() {
     setCooldown(true);
     setIsGenerating(true);
 
-    // Önce cache'i temizle
     await queryClient.invalidateQueries({ queryKey: ["/api/generate-names"] });
-
-    // Yeni isimler üret
     await refetch();
 
     setTimeout(() => {

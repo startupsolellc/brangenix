@@ -11,8 +11,8 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 10000, // 10 second timeout
-  maxRetries: 2
+  timeout: 30000, // 30 second timeout
+  maxRetries: 3
 });
 
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
@@ -50,12 +50,13 @@ export function registerRoutes(app: Express) {
         messages: [
           {
             role: "system",
-            content: "You are a brand name generator. Return names in JSON format: {\"names\": [\"name1\", \"name2\", ...]}"
+            content: "You are a brand name generator."
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.9,
-        max_tokens: 150
+        temperature: 0.7,
+        max_tokens: 150,
+        frequency_penalty: 0.5
       });
 
       console.log("OpenAI API response received");
