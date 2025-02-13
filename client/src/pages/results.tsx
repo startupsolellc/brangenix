@@ -51,9 +51,8 @@ export default function Results() {
 
   return (
     <div className="min-h-screen gradient-bg">
-      {/* Add padding-top to account for fixed navigation */}
       <div className="pt-24 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
           <h1 className="title text-center">
             {translations[language].title}
           </h1>
@@ -76,9 +75,9 @@ export default function Results() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {data?.names.map((name, index) => (
-              <BrandCard key={index} name={name} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {data?.names?.map((name, index) => (
+              <BrandCard key={`${name}-${index}`} name={name} />
             ))}
           </div>
         </div>
