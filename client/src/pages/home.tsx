@@ -52,7 +52,7 @@ export default function Home() {
     <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-jost font-bold mb-2">
+          <h1 className="text-3xl font-extrabold text-gray-800 dark:text-white mb-2">
             {translations[language].title}
           </h1>
         </div>
