@@ -25,7 +25,7 @@ export default function Results() {
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { guestToken, isOverLimit, trackGeneration, GUEST_LIMIT } = useGenerations();
+  const { guestToken, isOverLimit, trackGeneration, GUEST_LIMIT, guestGenerations } = useGenerations();
 
   const searchParams = new URLSearchParams(window.location.search);
   const keywords = searchParams.get("keywords")?.split(",") || [];
@@ -51,10 +51,11 @@ export default function Results() {
   });
 
   useEffect(() => {
-    if (isOverLimit && !showLimitDialog) {
+    // Only show limit dialog if user has actually exceeded the limit
+    if (isOverLimit && !showLimitDialog && guestGenerations >= GUEST_LIMIT) {
       setShowLimitDialog(true);
     }
-  }, [isOverLimit, showLimitDialog]);
+  }, [isOverLimit, showLimitDialog, guestGenerations, GUEST_LIMIT]);
 
   useEffect(() => {
     if (error) {

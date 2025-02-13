@@ -12,19 +12,18 @@ export function useGenerations() {
   const [isOverLimit, setIsOverLimit] = useState(false);
 
   useEffect(() => {
-    // Initialize guest token if not exists
+    // Initialize guest token if not exists, but don't reset generations
     if (!guestToken) {
       setGuestToken(uuidv4());
-      setGuestGenerations(0);
     }
-  }, [guestToken, setGuestToken, setGuestGenerations]);
+  }, [guestToken, setGuestToken]);
 
   useEffect(() => {
-    // Check if guest user is over limit
-    if (!guestToken) return;
-
-    const currentGenerations = Number(guestGenerations) || 0;
-    setIsOverLimit(currentGenerations >= GUEST_LIMIT);
+    // Only check limit for guest users with a token
+    if (guestToken) {
+      const currentGenerations = Number(guestGenerations) || 0;
+      setIsOverLimit(currentGenerations >= GUEST_LIMIT);
+    }
   }, [guestGenerations, guestToken]);
 
   const trackGeneration = () => {
