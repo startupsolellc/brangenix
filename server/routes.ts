@@ -60,6 +60,15 @@ app.post("/api/generate-names", async (req, res) => {
           code: "GUEST_TOKEN_MISSING"
         });
       }
+
+      // For guest users, we'll track generations in the headers
+      const guestGenerations = parseInt(req.headers['x-guest-generations'] as string) || 0;
+      if (guestGenerations >= GUEST_LIMIT) {
+        return res.status(403).json({
+          message: "Guest generation limit reached",
+          code: "GUEST_LIMIT_REACHED"
+        });
+      }
     } else {
       // For logged-in users, check premium status and credits availability
       const [user, isPremium] = await Promise.all([
@@ -124,7 +133,7 @@ app.post("/api/generate-names", async (req, res) => {
       names.push(`Brand${names.length + 1}`);
     }
 
-    // Now that we have successfully generated names, handle credit deduction for logged-in users
+    // Track the generation only after successful name generation
     if (req.user) {
       const isPremium = await storage.isPremiumUser(req.user.id);
       if (!isPremium) {
@@ -138,8 +147,11 @@ app.post("/api/generate-names", async (req, res) => {
           });
         }
       }
-      // Track the generation only after successful credit deduction
       await storage.trackGeneration(req.user.id);
+    } else {
+        //Increment guest generation count.  Requires adding logic to handle header updates.
+        const guestGenerations = parseInt(req.headers['x-guest-generations'] as string) || 0;
+        res.setHeader('x-guest-generations', String(guestGenerations + 1));
     }
 
     // Save the generated names
