@@ -12,11 +12,12 @@ export function useGenerations() {
   const [isOverLimit, setIsOverLimit] = useState(false);
 
   useEffect(() => {
-    // Initialize guest token if not exists
+    // Initialize guest token and generations if not exists
     if (!guestToken) {
       setGuestToken(uuidv4());
+      setGuestGenerations(0); // Reset generations for new guest tokens
     }
-  }, [guestToken, setGuestToken]);
+  }, [guestToken, setGuestToken, setGuestGenerations]);
 
   useEffect(() => {
     // Check if guest user is over limit

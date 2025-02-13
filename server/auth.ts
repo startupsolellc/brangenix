@@ -93,6 +93,7 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         email,
         hashedPassword,
+        isAdmin: false,
         generationCredits: 5 // Set initial credits for new users
       });
 
