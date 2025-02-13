@@ -4,7 +4,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Palette, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PostcardDesign } from "./postcard-design";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription 
+} from "@/components/ui/dialog";
 
 // Pre-selected Google Fonts
 const FONTS = [
@@ -84,6 +90,10 @@ export function BrandCard({ name }: BrandCardProps) {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
+              <DialogTitle>Share Brand Design</DialogTitle>
+              <DialogDescription>
+                Create a shareable postcard of your brand name design. You can download or share it directly.
+              </DialogDescription>
               <PostcardDesign 
                 name={name} 
                 color={color}
