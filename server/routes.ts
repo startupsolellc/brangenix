@@ -34,19 +34,38 @@ function cleanOldCache() {
 // Category-specific prompts
 const getCategoryPrompt = (category: string, keywords: string[], language: string) => {
   const basePrompt = language === "en"
-    ? `Generate 8 unique and brandable business names for a ${category} company using these keywords: ${keywords.join(", ")}. Names should be professional, catchy, and aligned with the industry.`
-    : `${category} sektöründe faaliyet gösterecek bir şirket için şu anahtar kelimeleri kullanarak 8 benzersiz ve akılda kalıcı marka ismi üret: ${keywords.join(", ")}. İsimler profesyonel ve etkileyici olmalı.`;
+    ? `Generate 8 completely unique and creative brand names based on these keywords: ${keywords.join(", ")}. The names should be:
+       - Completely different from each other
+       - Memorable and easy to pronounce
+       - Relevant to ${category} industry
+       - Avoid common naming patterns or overused suffixes
+       - Each name should have a unique character/style
+       Return exactly 8 names in a JSON array format.`
+    : `Şu anahtar kelimeleri kullanarak 8 adet tamamen benzersiz ve yaratıcı marka ismi üret: ${keywords.join(", ")}. İsimler:
+       - Birbirinden tamamen farklı olmalı
+       - Akılda kalıcı ve telaffuzu kolay olmalı
+       - ${category} sektörüne uygun olmalı
+       - Sık kullanılan kalıplardan veya eklerden kaçınmalı
+       - Her isim kendine özgü bir karakter/stile sahip olmalı
+       JSON dizi formatında tam 8 isim döndür.`;
 
-  // Add category-specific guidelines
-  const categoryPrompts: Record<string, string> = {
-    "finance": "Ensure names sound premium, reliable, and trustworthy.",
-    "ecommerce": "Create modern, memorable names suitable for online presence.",
-    "gaming": "Generate dynamic, engaging names appealing to a young audience.",
+  // Kategori özel kuralları
+  const categoryGuidelines: Record<string, string> = {
+    "ecommerce": language === "en"
+      ? "Make names suitable for digital presence and e-commerce platforms. Avoid generic terms like 'shop' or 'store'."
+      : "İsimler dijital varlık ve e-ticaret platformlarına uygun olmalı. 'shop' veya 'store' gibi genel terimlerden kaçının.",
+    "finance": language === "en"
+      ? "Create names that convey trust, reliability, and innovation in financial services. Avoid common fintech naming patterns."
+      : "Finansal hizmetlerde güven, güvenilirlik ve yenilikçiliği yansıtan isimler oluşturun. Yaygın fintech isimlendirme kalıplarından kaçının.",
+    "gaming": language === "en"
+      ? "Generate dynamic, engaging names suitable for gaming and entertainment. Each name should feel unique in the gaming space."
+      : "Oyun ve eğlence için uygun, dinamik ve ilgi çekici isimler oluşturun. Her isim oyun alanında benzersiz olmalı."
   };
 
   const categoryKey = category.toLowerCase().split(".")[0];
-  const guideline = categoryPrompts[categoryKey] || "";
-  return `${basePrompt} ${guideline} Return exactly 8 names in a JSON array format. Example response format: {"names": ["name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8"]}`;
+  const guideline = categoryGuidelines[categoryKey] || "";
+
+  return `${basePrompt}\n${guideline}`;
 };
 
 export function registerRoutes(app: Express) {
@@ -82,16 +101,20 @@ export function registerRoutes(app: Express) {
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
-          { 
-            role: "system", 
-            content: "You are a professional brand name generator. Return exactly 8 names in a JSON array format." 
+          {
+            role: "system",
+            content: `You are a creative brand name generator specialized in creating unique, memorable names.
+                     Each name you generate must be completely different from others.
+                     Never repeat patterns or similar word combinations.
+                     Focus on creating distinctive and original names.`
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.9, // Increase creativity further
-        top_p: 0.9, // Increase diversity further
+        temperature: 0.95, // Daha yaratıcı sonuçlar için artırıldı
+        top_p: 0.95, // Çeşitliliği artırmak için yükseltildi
         max_tokens: 150,
-        frequency_penalty: 0.8 // Increase penalty for repetition
+        frequency_penalty: 1.0, // Tekrarı önlemek için maksimum değer
+        presence_penalty: 0.8 // Yeni kelime kullanımını teşvik etmek için yüksek değer
       });
 
       const content = response.choices[0].message.content;
