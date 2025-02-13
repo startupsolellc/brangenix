@@ -54,7 +54,7 @@ export default function Results() {
     if (isOverLimit && !showLimitDialog) {
       setShowLimitDialog(true);
     }
-  }, [isOverLimit]);
+  }, [isOverLimit, showLimitDialog]);
 
   useEffect(() => {
     if (error) {
@@ -140,7 +140,7 @@ export default function Results() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {data?.names?.map((name, index) => (
+            {data?.names?.map((name) => (
               <BrandCard
                 key={`${name}-${Date.now()}-${Math.random()}`}
                 name={name}
@@ -153,11 +153,21 @@ export default function Results() {
       <AlertDialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Generation Limit Reached</AlertDialogTitle>
-            <AlertDialogDescription>
-              {guestToken
-                ? `You have used ${GUEST_LIMIT} free generations. Sign in to generate more names and unlock additional features!`
-                : "Upgrade to premium to generate unlimited brand names!"}
+            <AlertDialogTitle>
+              {guestToken ? "Free Generations Limit Reached" : "Generation Credits Used"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              {guestToken ? (
+                <>
+                  <p>You have used all {GUEST_LIMIT} free generations available to guest users.</p>
+                  <p>Sign in to get more free credits or upgrade to premium for unlimited generations!</p>
+                </>
+              ) : (
+                <>
+                  <p>You have used all your available generation credits.</p>
+                  <p>Upgrade to premium to unlock unlimited brand name generations and more premium features!</p>
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -166,8 +176,9 @@ export default function Results() {
                 setShowLimitDialog(false);
                 setLocation(guestToken ? "/auth" : "/coming-soon");
               }}
+              className="bg-blue-600 text-white hover:bg-blue-700"
             >
-              {guestToken ? "Sign In" : "Upgrade Now"}
+              {guestToken ? "Sign In" : "Upgrade to Premium"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
