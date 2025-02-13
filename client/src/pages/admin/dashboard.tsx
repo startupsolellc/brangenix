@@ -17,6 +17,11 @@ interface Statistics {
   activeUsers: number;
 }
 
+// Format number with commas as thousand separators
+const formatNumber = (num: number) => {
+  return num.toLocaleString('tr-TR');
+};
+
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery<Statistics>({
     queryKey: ["/api/admin/statistics"],
@@ -45,7 +50,7 @@ export default function AdminDashboard() {
             <CardDescription>All registered users</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats?.totalUsers || 0}</div>
+            <div className="text-3xl font-bold">{formatNumber(stats?.totalUsers || 0)}</div>
           </CardContent>
         </Card>
 
@@ -55,7 +60,7 @@ export default function AdminDashboard() {
             <CardDescription>Total names generated</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats?.totalGenerations || 0}</div>
+            <div className="text-3xl font-bold">{formatNumber(stats?.totalGenerations || 0)}</div>
           </CardContent>
         </Card>
 
@@ -65,7 +70,7 @@ export default function AdminDashboard() {
             <CardDescription>Users active in last 30 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats?.activeUsers || 0}</div>
+            <div className="text-3xl font-bold">{formatNumber(stats?.activeUsers || 0)}</div>
           </CardContent>
         </Card>
       </div>

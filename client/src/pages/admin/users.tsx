@@ -28,6 +28,10 @@ interface User {
   createdAt: string;
 }
 
+const formatNumber = (num: number) => {
+  return num.toLocaleString('tr-TR');
+};
+
 export default function UsersPage() {
   const { data: users, isLoading } = useQuery<{ users: User[]; total: number }>({
     queryKey: ["/api/admin/users"],
@@ -80,9 +84,9 @@ export default function UsersPage() {
                       {user.isAdmin ? "Admin" : "User"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.generationCredits}</TableCell>
+                  <TableCell>{formatNumber(user.generationCredits)}</TableCell>
                   <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {new Date(user.createdAt).toLocaleDateString('tr-TR')}
                   </TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm">
