@@ -144,6 +144,18 @@ export class DatabaseStorage implements IStorage {
 
   async decrementGenerationCredits(userId: number): Promise<void> {
     try {
+      console.log(`Attempting to decrement credits for user ${userId}`);
+
+      // First get current credits
+      const [currentUser] = await db
+        .select({
+          credits: users.generationCredits
+        })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      console.log(`Current credits for user ${userId}: ${currentUser?.credits}`);
+
       const result = await db
         .update(users)
         .set({
@@ -157,9 +169,14 @@ export class DatabaseStorage implements IStorage {
         )
         .returning({ updatedCredits: users.generationCredits });
 
+      console.log(`Update result for user ${userId}:`, result);
+
       if (!result.length) {
+        console.log(`No credits were decremented for user ${userId} - possibly at 0`);
         throw new Error("No credits available");
       }
+
+      console.log(`Successfully decremented credits for user ${userId}. New value: ${result[0].updatedCredits}`);
     } catch (error) {
       console.error("Error decrementing generation credits:", error);
       throw new Error("Failed to decrement generation credits");

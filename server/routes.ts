@@ -51,7 +51,7 @@ app.post("/api/generate-names", async (req, res) => {
   try {
     const { keywords, category, language } = generateNamesSchema.parse(req.body);
 
-    // Check usage limits
+    // Check usage limits and handle credit deduction upfront
     if (!req.user) {
       // Guest user - check localStorage token from headers
       const guestToken = req.headers['x-guest-token'];
@@ -62,17 +62,19 @@ app.post("/api/generate-names", async (req, res) => {
         });
       }
     } else {
-      // Logged in user - check if they're premium or have credits
-      const [user, isPremium] = await Promise.all([
-        storage.getUserById(req.user.id),
-        storage.isPremiumUser(req.user.id)
-      ]);
-
-      if (!isPremium && (!user?.generationCredits || user.generationCredits <= 0)) {
-        return res.status(403).json({
-          message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
-          code: "UPGRADE_REQUIRED"
-        });
+      // For logged-in users, check premium status and handle credits first
+      const isPremium = await storage.isPremiumUser(req.user.id);
+      if (!isPremium) {
+        try {
+          // Attempt to decrement credits before generating names
+          await storage.decrementGenerationCredits(req.user.id);
+        } catch (error) {
+          console.log("Credit deduction failed:", error);
+          return res.status(403).json({
+            message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
+            code: "UPGRADE_REQUIRED"
+          });
+        }
       }
     }
 
@@ -125,20 +127,8 @@ app.post("/api/generate-names", async (req, res) => {
       names.push(`Brand${names.length + 1}`);
     }
 
-    // For logged-in users who aren't premium, decrement credits first
+    // Only track generation after successful name generation
     if (req.user) {
-      const isPremium = await storage.isPremiumUser(req.user.id);
-      if (!isPremium) {
-        try {
-          await storage.decrementGenerationCredits(req.user.id);
-        } catch (error) {
-          return res.status(403).json({
-            message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
-            code: "UPGRADE_REQUIRED"
-          });
-        }
-      }
-      // Track the generation after successful credit deduction
       await storage.trackGeneration(req.user.id);
     }
 
