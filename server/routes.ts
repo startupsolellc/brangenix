@@ -61,16 +61,14 @@ export function registerRoutes(app: Express) {
             code: "GUEST_TOKEN_MISSING"
           });
         }
-
-        // Get guest generations from localStorage (handled client-side)
       } else {
-        // Logged in user - check database counts
-        const generations = await storage.getUserGenerations(req.user.id);
+        // Logged in user - check generation credits
+        const user = await storage.getUserById(req.user.id);
         const isPremium = await storage.isPremiumUser(req.user.id);
 
-        if (!isPremium && generations >= FREE_USER_LIMIT) {
+        if (!isPremium && (!user?.generationCredits || user.generationCredits <= 0)) {
           return res.status(403).json({
-            message: "Upgrade to premium for unlimited generations",
+            message: "No generation credits remaining. Upgrade to premium for unlimited generations.",
             code: "UPGRADE_REQUIRED"
           });
         }
@@ -125,9 +123,14 @@ export function registerRoutes(app: Express) {
         names.push(`Brand${names.length + 1}`);
       }
 
-      // Track the generation
+      // Track the generation and update credits for logged-in users
       if (req.user) {
         await storage.trackGeneration(req.user.id);
+        // Decrement generation credits if not premium
+        const isPremium = await storage.isPremiumUser(req.user.id);
+        if (!isPremium) {
+          await storage.decrementGenerationCredits(req.user.id);
+        }
       }
 
       const responseData = { names };

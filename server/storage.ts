@@ -11,6 +11,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(data: { email: string; hashedPassword: string }): Promise<User>;
   isPremiumUser(userId: number): Promise<boolean>;
+  decrementGenerationCredits(userId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -138,6 +139,20 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error checking premium status:", error);
       throw new Error("Failed to check premium status");
+    }
+  }
+
+  async decrementGenerationCredits(userId: number): Promise<void> {
+    try {
+      await db
+        .update(users)
+        .set({
+          generationCredits: sql`${users.generationCredits} - 1`
+        })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error("Error decrementing generation credits:", error);
+      throw new Error("Failed to decrement generation credits");
     }
   }
 }
