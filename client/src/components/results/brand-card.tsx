@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Palette } from "lucide-react";
@@ -24,6 +24,8 @@ export function BrandCard({ name }: BrandCardProps) {
   const [color, setColor] = useState("#000000");
   const [font, setFont] = useState("");
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Load fonts
@@ -41,20 +43,27 @@ export function BrandCard({ name }: BrandCardProps) {
   }, []);
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     setColor(e.target.value);
-    setShowColorPicker(false);
   };
 
   useEffect(() => {
     if (!showColorPicker) return;
 
-    const handleClickOutside = () => {
-      setShowColorPicker(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        colorPickerRef.current && 
+        !colorPickerRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowColorPicker(false);
+      }
     };
 
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showColorPicker]);
 
@@ -65,6 +74,7 @@ export function BrandCard({ name }: BrandCardProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                ref={buttonRef}
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 p-0"
@@ -83,6 +93,7 @@ export function BrandCard({ name }: BrandCardProps) {
 
           {showColorPicker && (
             <div 
+              ref={colorPickerRef}
               className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 z-50"
               onClick={(e) => e.stopPropagation()}
             >
@@ -91,6 +102,7 @@ export function BrandCard({ name }: BrandCardProps) {
                 value={color}
                 onChange={handleColorChange}
                 className="w-8 h-8 cursor-pointer rounded"
+                onMouseDown={(e) => e.stopPropagation()}
               />
             </div>
           )}
